@@ -1,0 +1,15 @@
+{
+  "case_id": "CASE005_NORMAL",
+  "description": "电商客服正常运营指标（合成数据）",
+  "metrics": {
+    "refund_rate": 0.08,
+    "complaint_rate": 0.03,
+    "promise_conflict_rate": 0.05,
+    "knowledge_source_conflict_rate": 0.04,
+    "manual_handoff_rate": 0.12,
+    "appeal_success_rate": 0.45,
+    "resolution_satisfaction": 0.78,
+    "response_time_score": 0.85,
+    "policy_clarity_score": 0.82
+  }
+}

@@ -1,72 +1,149 @@
-# Full-Spectrum-Engine-
+﻿# Full Spectrum Engine
 
-Local-first engine layer for the Full Spectrum ecosystem.
+> Local-first governance engine for Full Spectrum-compatible simulation, risk visibility, audit trace, and reproducible enterprise-side validation.
 
-This repository is the public engine workspace under `full-spectrum-lab`. It focuses on the executable side of the project: simulation, validation, case-driven workflows, schema checks, and local governance hooks.
+[![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2%20%2F%20Apache%202.0-blue)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10+-green)](https://www.python.org/)
+[![Status](https://img.shields.io/badge/Status-v0.7.2--alpha-orange)](#)
+[![Tests](https://img.shields.io/badge/Tests-125%20passed-brightgreen)](#)
 
-It is intentionally not the protocol source of truth.
-For the protocol and governance layer, see:
+Full Spectrum Engine is the runnable local-first engine layer in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible simulation outputs, `RiskVector`, `Runestone`, `AuditTrace`, and optional ESS-lite path suggestions.
 
-- [full-spectrum-ethics](https://github.com/blackswan-ai-immunity/full-spectrum-ethics)
-- [Full Spectrum Protocol website](https://fullspectrumprotocol.com/)
+It is designed for internal validation first:
 
-## What this repo is for
+- local execution;
+- offline-capable testing;
+- desensitized or synthetic samples;
+- auditable records;
+- non-invasive governance experiments.
 
-- A runnable engine layer for local verification and internal trials
-- A place for reproducible scenarios, schemas, and validation scripts
-- A bridge between protocol ideas and executable engineering artifacts
-- A public home for demos, release notes, and implementation references
+It does **not** upload enterprise data by default, does **not** require joining a protocol network before use, and does **not** execute final business actions on behalf of an enterprise.
 
-## Current status
+## 中文一句话
 
-- Early-stage engine workspace
-- Local-first and experimental
-- Suitable for internal validation, scenario simulation, and iterative release work
-- Not a finished commercial product
+这是全频谱体系里“企业内部引擎层”的最小可运行版本：先让单个主体在自己的边界内看见风险、留下审计记录、完成本地验证，再决定是否进入更重的细胞协议层或协议网络层。
 
-## Suggested reading path
+---
 
-1. Start with the protocol overview:
-   - [Protocol guide](https://fullspectrumprotocol.com/protocols/guide.html)
-   - [Identity protocol](https://fullspectrumprotocol.com/protocols/identity-protocol.html)
-   - [Technical spec](https://fullspectrumprotocol.com/protocols/tech-spec.html)
+## What this engine does
 
-2. Then read the public governance repository:
-   - [full-spectrum-ethics](https://github.com/blackswan-ai-immunity/full-spectrum-ethics)
+- models a three-dimensional governance state `S(t) = [Survival, Coordination, Meaning]`;
+- computes FSHI (Full Spectrum Health Index);
+- generates structured `RiskVector` and `Runestone` outputs;
+- records local `AuditTrace` results;
+- supports deterministic simulation with `--seed`;
+- provides industry-adapter experiments, including e-commerce customer service;
+- exposes a local REST API for development and testing;
+- stores local audit records in SQLite;
+- supports optional ESS-lite path simulation for non-binding treatment suggestions.
 
-3. Finally, follow the engine implementation notes and release docs in this repository.
+## What this engine does not do
 
-## Recommended repo structure
+- does not replace legal, compliance, or business review;
+- does not execute refunds, penalties, bans, or final rulings;
+- does not implement the full four-layer recursive architecture yet;
+- does not implement protocol-network interoperability yet;
+- does not implement full Cell Manifest yet;
+- does not implement full DreamBrain yet;
+- does not implement Frequency Economy settlement yet.
 
-This repository will gradually grow around four practical blocks:
+---
 
-- `docs/` — release notes, implementation notes, and usage guides
-- `examples/` — reproducible scenarios and sample inputs/outputs
-- `schemas/` — machine-checkable JSON schemas
-- `tests/` — automated validation and regression checks
+## Repository role in the ecosystem
 
-## How to contribute
+| Repository | Role |
+| --- | --- |
+| [`full-spectrum-protocol`](https://github.com/full-spectrum-lab/full-spectrum-protocol) | Public protocol specification, RFCs, schemas, mappings, and examples |
+| [`full-spectrum-engine`](https://github.com/full-spectrum-lab/full-spectrum-engine) | Runnable local-first engine (this repository) |
+| [`full-spectrum-enterprise-governance`](https://github.com/full-spectrum-lab/full-spectrum-enterprise-governance) | Enterprise deployment package, industry adapters, dashboards, and internal governance workflows |
+| [`full-spectrum-commons`](https://github.com/full-spectrum-lab/full-spectrum-commons) | Shared diagrams, ecosystem descriptions, and public-facing common materials |
 
-At this stage, contribution should focus on:
+A practical adoption path is:
 
-- keeping examples reproducible
-- keeping schemas stable and readable
-- improving quick-start docs
-- adding validation coverage before adding new features
+1. run the **engine layer** locally inside one organization;
+2. add **cell protocol declarations** when identity, permission, and responsibility need to be formalized;
+3. add the **protocol network layer** only when multiple subjects need cross-node audit or coordination.
 
-## Relationship to the protocol repo
+---
 
-Think of it this way:
+## Quick start
 
-- `full-spectrum-ethics` defines the protocol language and governance ideas
-- `Full-Spectrum-Engine-` turns those ideas into runnable, testable artifacts
+```bash
+git clone https://github.com/full-spectrum-lab/full-spectrum-engine.git
+cd full-spectrum-engine
+pip install -r requirements.txt
 
-The two repos should stay aligned, but they do not serve the same purpose.
+# run a simulation
+python simulate.py --config examples/scenario_refund_conflict.json
 
-## Notes
+# reproducible output
+python simulate.py --config examples/scenario_refund_conflict.json --seed 42
 
-If you are looking for the broader project narrative, visit:
+# run tests
+python -m pytest tests -v
 
-- [fullspectrumprotocol.com](https://fullspectrumprotocol.com/)
+# start local API
+pip install -e ".[api]"
+python -m src.api.server
+```
 
-If you are looking for implementation direction, this repo is the right place.
+API docs (local only):
+
+- [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+---
+
+## Recommended reading order
+
+1. [docs/public-preview-boundary.md](docs/public-preview-boundary.md)
+2. [docs/getting-started-5min.md](docs/getting-started-5min.md)
+3. [docs/local-first-engine.md](docs/local-first-engine.md)
+4. [docs/release-v0.7.2-alpha.md](docs/release-v0.7.2-alpha.md)
+5. [examples/README.md](examples/README.md)
+6. [test-records/README.md](test-records/README.md)
+7. protocol-side materials in [`full-spectrum-protocol`](https://github.com/full-spectrum-lab/full-spectrum-protocol)
+
+---
+
+## Current release boundary
+
+Current public preview target:
+
+```text
+Runnable locally
+Testable and reproducible
+Auditable at sample level
+Useful for synthetic scenario validation
+Not yet a production governance platform
+```
+
+This repository is suitable today for:
+
+- AI governance research;
+- enterprise-side internal validation;
+- customer-service quality inspection experiments;
+- local audit trail prototyping;
+- protocol-compatible simulation tests.
+
+---
+
+## Test status
+
+Current local verification baseline:
+
+```text
+125 passed, 1 warning
+```
+
+The remaining warning comes from FastAPI / Starlette test dependency behavior and is not currently treated as a blocker for this alpha preview.
+
+---
+
+## License
+
+Dual license:
+
+- Mulan PSL v2
+- Apache License 2.0
+
+See [LICENSE](LICENSE).

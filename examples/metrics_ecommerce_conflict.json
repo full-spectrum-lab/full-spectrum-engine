@@ -1,0 +1,15 @@
+{
+  "case_id": "CASE005_CONFLICT",
+  "description": "电商客服知识源冲突场景指标（合成数据，对齐 CASE005）",
+  "metrics": {
+    "refund_rate": 0.15,
+    "complaint_rate": 0.12,
+    "promise_conflict_rate": 0.22,
+    "knowledge_source_conflict_rate": 0.18,
+    "manual_handoff_rate": 0.28,
+    "appeal_success_rate": 0.25,
+    "resolution_satisfaction": 0.48,
+    "response_time_score": 0.62,
+    "policy_clarity_score": 0.45
+  }
+}

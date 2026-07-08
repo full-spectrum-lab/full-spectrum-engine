@@ -1,0 +1,16 @@
+{
+  "industry": "logistics_customer_service",
+  "scenario": "conflict",
+  "description": "冷链爆仓期间，大量延迟+信息不一致+赔付纠纷",
+  "metrics": {
+    "delivery_delay_rate": 0.35,
+    "package_loss_rate": 0.08,
+    "route_deviation_rate": 0.15,
+    "first_resolution_rate": 0.40,
+    "information_gap_rate": 0.45,
+    "multi_touchpoint_conflict": 0.55,
+    "compensation_fairness": 0.30,
+    "communication_clarity": 0.25,
+    "commitment_fulfillment": 0.20
+  }
+}
