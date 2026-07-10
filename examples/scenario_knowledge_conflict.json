@@ -1,0 +1,28 @@
+{
+  "simulation_id": "CASE005_KNOWLEDGE_CONFLICT",
+  "input_query": "AI助手与企业知识库对同一问题给出矛盾答案，需要裁决以哪个为准",
+  "sensitivity_level": "medium",
+  "enterprise_id": "knowledge-service",
+  "rule_version": "v0.3",
+  "initial_state": {
+    "survival": 0.80,
+    "coordination": 0.50,
+    "meaning": 0.35
+  },
+  "agents": [
+    {"type": "AI", "weight": 0.35},
+    {"type": "Human", "weight": 0.25},
+    {"type": "Regulator", "weight": 0.20},
+    {"type": "Enterprise", "weight": 0.20}
+  ],
+  "weights": {
+    "survival": 0.35,
+    "coordination": 0.35,
+    "meaning": 0.30
+  },
+  "ess_horizon": 7,
+  "ess_candidates": 15,
+  "conflict_density": 0.4,
+  "reversibility": 0.7,
+  "diffusivity": 0.3
+}

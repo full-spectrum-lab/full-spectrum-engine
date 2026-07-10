@@ -1,0 +1,28 @@
+{
+  "simulation_id": "CASE001_REFUND_CONFLICT",
+  "input_query": "用户申请退款，但商家以'已拆封'为由拒绝，平台需要裁决是否强制退款",
+  "sensitivity_level": "high",
+  "enterprise_id": "ecommerce-platform",
+  "rule_version": "v0.3",
+  "initial_state": {
+    "survival": 0.72,
+    "coordination": 0.45,
+    "meaning": 0.55
+  },
+  "agents": [
+    {"type": "AI", "weight": 0.40},
+    {"type": "Human", "weight": 0.20},
+    {"type": "Regulator", "weight": 0.25},
+    {"type": "Enterprise", "weight": 0.15}
+  ],
+  "weights": {
+    "survival": 0.40,
+    "coordination": 0.35,
+    "meaning": 0.25
+  },
+  "ess_horizon": 5,
+  "ess_candidates": 10,
+  "conflict_density": 0.6,
+  "reversibility": 0.4,
+  "diffusivity": 0.5
+}

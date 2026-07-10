@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  fullspectrum-validator:
+    image: python:3.11-slim
+    container_name: fullspectrum-validator
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./../..:/app
+    environment:
+      - PYTHONPATH=/app
+      - LOG_LEVEL=info
+    command: >
+      sh -c "
+        pip install -r /app/requirements.txt && 
+        python /app/examples/validation-kit/validator-cli.py --scenario all
+      "
+    restart: "no"
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fullspectrum-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana-dashboards:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - fullspectrum-validator
+    restart: "no"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fullspectrum-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - fullspectrum-validator
+    restart: "no"

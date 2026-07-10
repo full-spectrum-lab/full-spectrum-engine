@@ -1,0 +1,323 @@
+{
+  "simulation_id": "CASE005_KNOWLEDGE_CONFLICT",
+  "timestamp": "2026-07-04T00:00:00Z",
+  "input_query": "AI助手与企业知识库对同一问题给出矛盾答案，需要裁决以哪个为准",
+  "sensitivity_level": "medium",
+  "initial_state": {
+    "survival": 0.8,
+    "coordination": 0.5,
+    "meaning": 0.35
+  },
+  "final_state": {
+    "survival": 0.8075,
+    "coordination": 0.508475,
+    "meaning": 0.35727499999999995
+  },
+  "fshi": {
+    "value": 56.78,
+    "risk_level": "WARNING",
+    "weights": {
+      "survival": 0.35,
+      "coordination": 0.35,
+      "meaning": 0.3
+    }
+  },
+  "ess": {
+    "selected_option": "PATH-001",
+    "horizon": 7,
+    "paths": [
+      {
+        "option": "PATH-001",
+        "selected": true,
+        "total_pain": 9.2359,
+        "low_freq": 0.479,
+        "mid_freq": 0.3384,
+        "high_freq": 0.2765
+      },
+      {
+        "option": "PATH-002",
+        "selected": false,
+        "total_pain": 9.2459,
+        "low_freq": 0.3699,
+        "mid_freq": 0.3926,
+        "high_freq": 0.2993
+      },
+      {
+        "option": "PATH-003",
+        "selected": false,
+        "total_pain": 9.2485,
+        "low_freq": 0.4248,
+        "mid_freq": 0.2931,
+        "high_freq": 0.3324
+      },
+      {
+        "option": "PATH-004",
+        "selected": false,
+        "total_pain": 9.2487,
+        "low_freq": 0.4098,
+        "mid_freq": 0.3369,
+        "high_freq": 0.3086
+      },
+      {
+        "option": "PATH-005",
+        "selected": false,
+        "total_pain": 9.2489,
+        "low_freq": 0.4762,
+        "mid_freq": 0.2883,
+        "high_freq": 0.2883
+      }
+    ]
+  },
+  "validation": {
+    "dream_butterfly_passed": true,
+    "dream_butterfly_reason": "ALL_PASSED",
+    "bomb_triggered": false,
+    "bomb_reason": "未触发",
+    "brake_state": "TRIGGERED"
+  },
+  "risk_vector": {
+    "survival_impact": 0.1925,
+    "trust_impact": 0.491525,
+    "meaning_impact": 0.642725,
+    "reversibility": 0.7,
+    "explainability": 0.8,
+    "diffusivity": 0.3,
+    "urgency": 0.5,
+    "uncertainty": 0.2
+  },
+  "runestone": {
+    "runestone_id": "RS_77afaec728dac918",
+    "timestamp": 1783123242.0,
+    "decision": "PATH-001",
+    "reason": "ESS-knowledge-service-v0.3",
+    "risk_vector": {
+      "survival_impact": 0.1925,
+      "trust_impact": 0.491525,
+      "meaning_impact": 0.642725,
+      "reversibility": 0.7,
+      "explainability": 0.8,
+      "diffusivity": 0.3,
+      "urgency": 0.5,
+      "uncertainty": 0.2
+    },
+    "parent_runestone": null,
+    "agent_trail": [
+      "AI_Agent",
+      "Human_Agent",
+      "Regulator_Agent",
+      "Enterprise_Agent"
+    ],
+    "ess_snapshot": {
+      "horizon": 7,
+      "num_paths": 5,
+      "selected_pain": 9.23594751952488
+    },
+    "causal_chain": null,
+    "signature": null
+  },
+  "causal_chain": {
+    "causal_chain_id": "CC_8fd8a5a9b57a10ea",
+    "timestamp": "2026-07-04T00:00:00Z",
+    "version": "1.0",
+    "system_state": {
+      "current_state": "WARNING",
+      "judgment_basis": [
+        "FSHI=56.8 (WARNING)",
+        "ESS selected PATH-001 (pain=9.236)",
+        "Bomb: not triggered"
+      ],
+      "spectrum_priority": "meaning"
+    },
+    "ess_decision_context": {
+      "candidate_options": [
+        "PATH-001",
+        "PATH-002",
+        "PATH-003",
+        "PATH-004",
+        "PATH-005"
+      ],
+      "selected_option": "PATH-001",
+      "horizon": 7
+    },
+    "causal_paths": [
+      {
+        "path_id": "PATH-001",
+        "option": "PATH-001",
+        "selected": true,
+        "frequency_impacts": {
+          "低频": {
+            "seed_type": "生存保障",
+            "intensity": 0.4789606407753696,
+            "description": "低频影响强度 0.48"
+          },
+          "中频": {
+            "seed_type": "信任修复",
+            "intensity": 0.3383717364576454,
+            "description": "中频影响强度 0.34"
+          },
+          "高频": {
+            "seed_type": "意义漂移",
+            "intensity": 0.27652628070325236,
+            "description": "高频影响强度 0.28"
+          }
+        },
+        "total_pain": 9.23594751952488,
+        "chain_visual": "低频(0.48) → 中频(0.34) → 高频(0.28)"
+      },
+      {
+        "path_id": "PATH-002",
+        "option": "PATH-002",
+        "selected": false,
+        "frequency_impacts": {
+          "低频": {
+            "seed_type": "生存保障",
+            "intensity": 0.3699146693885302,
+            "description": "低频影响强度 0.37"
+          },
+          "中频": {
+            "seed_type": "信任修复",
+            "intensity": 0.39261390922544687,
+            "description": "中频影响强度 0.39"
+          },
+          "高频": {
+            "seed_type": "意义漂移",
+            "intensity": 0.2993251387631033,
+            "description": "高频影响强度 0.30"
+          }
+        },
+        "total_pain": 9.245880626422705,
+        "chain_visual": "低频(0.37) → 中频(0.39) → 高频(0.30)"
+      },
+      {
+        "path_id": "PATH-003",
+        "option": "PATH-003",
+        "selected": false,
+        "frequency_impacts": {
+          "低频": {
+            "seed_type": "生存保障",
+            "intensity": 0.42483570765056167,
+            "description": "低频影响强度 0.42"
+          },
+          "中频": {
+            "seed_type": "信任修复",
+            "intensity": 0.29308678494144075,
+            "description": "中频影响强度 0.29"
+          },
+          "高频": {
+            "seed_type": "意义漂移",
+            "intensity": 0.3323844269050346,
+            "description": "高频影响强度 0.33"
+          }
+        },
+        "total_pain": 9.248506811423724,
+        "chain_visual": "低频(0.42) → 中频(0.29) → 高频(0.33)"
+      },
+      {
+        "path_id": "PATH-004",
+        "option": "PATH-004",
+        "selected": false,
+        "frequency_impacts": {
+          "低频": {
+            "seed_type": "生存保障",
+            "intensity": 0.4098430617934562,
+            "description": "低频影响强度 0.41"
+          },
+          "中频": {
+            "seed_type": "信任修复",
+            "intensity": 0.3369233289997705,
+            "description": "中频影响强度 0.34"
+          },
+          "高频": {
+            "seed_type": "意义漂移",
+            "intensity": 0.30856841405949853,
+            "description": "高频影响强度 0.31"
+          }
+        },
+        "total_pain": 9.248700473214782,
+        "chain_visual": "低频(0.41) → 中频(0.34) → 高频(0.31)"
+      },
+      {
+        "path_id": "PATH-005",
+        "option": "PATH-005",
+        "selected": false,
+        "frequency_impacts": {
+          "低频": {
+            "seed_type": "生存保障",
+            "intensity": 0.4761514928204013,
+            "description": "低频影响强度 0.48"
+          },
+          "中频": {
+            "seed_type": "信任修复",
+            "intensity": 0.2882923312638332,
+            "description": "中频影响强度 0.29"
+          },
+          "高频": {
+            "seed_type": "意义漂移",
+            "intensity": 0.288293152152541,
+            "description": "高频影响强度 0.29"
+          }
+        },
+        "total_pain": 9.248902649208954,
+        "chain_visual": "低频(0.48) → 中频(0.29) → 高频(0.29)"
+      }
+    ],
+    "dream_butterfly_validation": {
+      "passed": true,
+      "reason": "ALL_PASSED",
+      "bomb_triggered": false,
+      "bomb_reason": "未触发"
+    },
+    "soul_account": {
+      "initial_balance": 100,
+      "debits": [
+        {
+          "item": "系统冲突误判",
+          "points": -8,
+          "basis": "误判为风险事件而非语义冲突"
+        },
+        {
+          "item": "知情不作为",
+          "points": -15,
+          "basis": "已知风险但延迟行动"
+        }
+      ],
+      "credits": [
+        {
+          "item": "公开承认",
+          "points": 3,
+          "basis": "公开承认跨系统语义冲突"
+        }
+      ],
+      "balance": 80,
+      "health_status": "亚健康"
+    },
+    "who_hurts": {
+      "低频": {
+        "pain_bearer": "基层开发者",
+        "description": "系统压力增加，生存成本上升"
+      },
+      "中频": {
+        "pain_bearer": "合作伙伴",
+        "description": "信任关系受损，协作成本上升"
+      },
+      "高频": {
+        "pain_bearer": "决策者",
+        "description": "意义方向模糊，长期叙事不确定"
+      }
+    },
+    "frequency_plan": {
+      "recommendation": "优先修复中频信任，次低频生存，高频暂缓",
+      "priority": "meaning",
+      "interventions": [
+        {
+          "name": "信任重建机制",
+          "target_frequency": "中频",
+          "description": "建立跨系统信任审计机制",
+          "expected_effect": "信任资本+10分",
+          "urgency": "高"
+        }
+      ]
+    },
+    "full_chain_narrative": "本次决策推演识别到系统处于WARNING状态。候选路径中，'PATH-001'的总痛苦最低，但需要持续监测系统状态变化。"
+  }
+}
