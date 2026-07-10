@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — 适配器显式注册表
+Full Spectrum Engine API — Explicit adapter registry.
 
-设计原则（P1-4 修复）：
-    - 使用显式注册表，不是"自动发现"
-    - 已注册 adapter 可被 API 列出和调用
-    - 未注册 adapter 返回 422
-    - v0.7 再考虑插件式自动发现
-    - try-except 防护：单个适配器导入失败不影响整体启动
+Design principles (P1-4 fix):
+    - Uses an explicit registry, not "auto-discovery"
+    - Registered adapters can be listed and invoked via API
+    - Unregistered adapters return 422
+    - Plugin-style auto-discovery deferred to v0.7+
+    - try-except guard: a single adapter import failure does not block startup
 """
 
 import logging
@@ -20,9 +20,9 @@ logger = logging.getLogger("full-spectrum.api.registry")
 
 class AdapterRegistry:
     """
-    适配器显式注册表。
+    Explicit adapter registry.
 
-    用法：
+    Usage:
         registry = AdapterRegistry()
         registry.register(EcommerceCustomerServiceAdapter)
         adapter = registry.get("ecommerce_customer_service")
@@ -34,9 +34,10 @@ class AdapterRegistry:
 
     def register(self, adapter_class: Type[MetricAdapter]) -> None:
         """
-        注册一个适配器类。
+        Register an adapter class.
 
-        使用 try-except 防护：如果实例化失败，记录错误但不影响其他适配器。
+        Uses try-except guard: if instantiation fails, the error is logged
+        but other adapters are not affected.
         """
         try:
             instance = adapter_class()
@@ -47,20 +48,20 @@ class AdapterRegistry:
             logger.error(f"Failed to register adapter {adapter_class.__name__}: {e}")
 
     def get(self, industry: str) -> Optional[MetricAdapter]:
-        """获取已注册的适配器实例。未注册返回 None。"""
+        """Get a registered adapter instance. Returns None if not registered."""
         return self._adapters.get(industry)
 
     def list_industries(self) -> List[str]:
-        """返回所有已注册的行业标识列表。"""
+        """Return a list of all registered industry identifiers."""
         return list(self._adapters.keys())
 
     def is_registered(self, industry: str) -> bool:
-        """检查行业是否已注册。"""
+        """Check whether an industry is registered."""
         return industry in self._adapters
 
 
 # ============================================================
-# 全局注册表实例（显式注册，不是自动发现）
+# Global registry instance (explicit registration, not auto-discovery)
 # ============================================================
 
 _registry = AdapterRegistry()
@@ -68,10 +69,10 @@ _registry = AdapterRegistry()
 
 def _init_default_adapters():
     """
-    显式注册默认适配器。
+    Explicitly register default adapters.
 
-    每个适配器用独立的 try-except 包裹，
-    防止单个适配器导入失败导致整个 API 服务启动不了。
+    Each adapter is wrapped in its own try-except,
+    so a single adapter import failure does not prevent the API from starting.
     """
     try:
         from ..adapters.ecommerce_adapter import EcommerceCustomerServiceAdapter
@@ -90,10 +91,10 @@ def _init_default_adapters():
         logger.error(f"Failed to register LogisticsAdapter: {e}")
 
 
-# 模块加载时自动初始化默认适配器
+# Auto-initialize default adapters on module load
 _init_default_adapters()
 
 
 def get_registry() -> AdapterRegistry:
-    """获取全局注册表实例。"""
+    """Get the global registry instance."""
     return _registry

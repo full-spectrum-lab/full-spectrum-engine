@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — 路由定义 (v0.7.2-alpha)
+Full Spectrum Engine API — Route definitions (v0.9.0-alpha)
 
-8 个端点：
-    GET    /api/v1/health                    — 健康检查（增强：storage metadata）
-    POST   /api/v1/evaluate                  — 仿真评估（直接模式 + 适配器模式）
-    POST   /api/v1/runestone                 — 独立符石生成
-    GET    /api/v1/decisions/{id}            — 决策记录查询（从 SQLite 读取）
-    GET    /api/v1/audit/decisions           — 决策审计列表查询 (v0.6 新增)
-    GET    /api/v1/audit/runestones          — 符石审计列表查询 (v0.6 新增)
-    GET    /api/v1/audit/runestones/{id}     — 单个符石查询 (v0.6 新增)
-    DELETE /api/v1/audit/decisions           — 数据清理（带安全阀）(v0.6 新增)
+8 endpoints:
+    GET    /api/v1/health                    — Health check (enhanced: storage metadata)
+    POST   /api/v1/evaluate                  — Simulation evaluation (direct mode + adapter mode)
+    POST   /api/v1/runestone                 — Standalone runestone generation
+    GET    /api/v1/decisions/{id}            — Decision record lookup (from SQLite)
+    GET    /api/v1/audit/decisions           — Decision audit list query (v0.6)
+    GET    /api/v1/audit/runestones          — Runestone audit list query (v0.6)
+    GET    /api/v1/audit/runestones/{id}     — Single runestone lookup (v0.6)
+    DELETE /api/v1/audit/decisions           — Data cleanup with safety valve (v0.6)
 
-工程约束：
-    - API body 严格兼容 CLI 输出（无 envelope）(P1-1)
-    - 元信息走 HTTP headers (P1-1)
-    - decision_id 与 runestone_id 严格区分 (P0-1)
-    - 错误码统一 422/404/500 (P1-2)
-    - risk_vector 校验失败返回 422，不裸 500 (P1-3)
-    - include_input_metrics 默认 false (P1-5)
-    - v0.6: SQLite 持久化层，X-Storage-Mode=sqlite-persistent
-    - v0.6: X-Input-Metrics-Persisted 响应头 (NFR-16)
-    - v0.6: DELETE 安全阀 (confirm + before/all + 本地绑定)
+Engineering constraints:
+    - API body strictly compatible with CLI output (no envelope) (P1-1)
+    - Metadata goes in HTTP headers (P1-1)
+    - decision_id and runestone_id strictly separated (P0-1)
+    - Error codes unified 422/404/500 (P1-2)
+    - risk_vector validation failure returns 422, not bare 500 (P1-3)
+    - include_input_metrics defaults to false (P1-5)
+    - v0.6: SQLite persistence layer, X-Storage-Mode=sqlite-persistent
+    - v0.6: X-Input-Metrics-Persisted response header (NFR-16)
+    - v0.6: DELETE safety valve (confirm + before/all + local-only binding)
+    - v0.9: All error responses use structured format {"message", "error_code"}
 """
 
 import hashlib
@@ -39,7 +40,7 @@ from fastapi.responses import JSONResponse
 from .models import EvaluateRequest, RunestoneRequest, HealthResponse
 from .registry import get_registry
 
-# 确保项目根目录在 sys.path 中，以便导入 simulate.py
+# Ensure project root is on sys.path so we can import simulate.py
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
@@ -47,19 +48,20 @@ if _PROJECT_ROOT not in sys.path:
 from simulate import run_simulation  # noqa: E402
 from src.bridge.runestone import Runestone, RiskVector, ReasonField  # noqa: E402
 
-router = APIRouter(prefix="/api/v1", tags=["v0.7.2-alpha"])
+router = APIRouter(prefix="/api/v1", tags=["v0.9.0-alpha"])
 
-# API 版本标识
-API_VERSION = "0.7.2a1"
-ENGINE_VERSION = "0.7.2-alpha"
+# API version identifiers
+API_VERSION = "0.9.0a1"
+ENGINE_VERSION = "0.9.0-alpha"
 
-# 风险向量必需字段（与 RiskVector.to_dict() 一致）
-# 注意：reversibility 字段名保留以兼容协议规范，语义为 irreversibility（值越高越不可逆）
+# Required risk vector fields (must match RiskVector.to_dict())
+# Note: the field name "reversibility" is retained for protocol compatibility,
+# but its semantics are "irreversibility" (higher value = more irreversible).
 RISK_VECTOR_FIELDS = [
     "survival_impact",
     "trust_impact",
     "meaning_impact",
-    "reversibility",  # 语义为 irreversibility
+    "reversibility",  # semantics: irreversibility
     "explainability",
     "diffusivity",
     "urgency",
@@ -68,15 +70,16 @@ RISK_VECTOR_FIELDS = [
 
 
 # ============================================================
-# 辅助函数
+# Helper functions
 # ============================================================
 
 def _generate_decision_id(scenario: dict, seed: int) -> str:
     """
-    基于场景内容和种子生成确定性 decision_id (P0-1)。
+    Generate a deterministic decision_id from scenario content and seed (P0-1).
 
-    decision_id 是 API 层的评估记录 ID，与 runestone_id（审计令牌 ID）严格区分。
-    同一 scenario + seed 总是生成相同的 decision_id，保证可复现。
+    decision_id is the API-layer evaluation record ID, strictly separated from
+    runestone_id (the audit token ID). The same scenario + seed always produces
+    the same decision_id, ensuring reproducibility.
     """
     payload = json.dumps(
         {"scenario": scenario, "seed": seed},
@@ -92,11 +95,11 @@ def _set_metadata_headers(
     input_metrics_persisted: Optional[bool] = None,
 ) -> None:
     """
-    在响应上设置 API 元信息 headers (P1-1)。
+    Set API metadata headers on the response (P1-1).
 
-    这些信息不放入 body，确保 API body 能与 CLI 输出做 diff。
-    v0.6: X-Storage-Mode 更新为 sqlite-persistent。
-    v0.6: NFR-16 X-Input-Metrics-Persisted 响应头。
+    These are kept out of the body so the API body can be diffed against CLI output.
+    v0.6: X-Storage-Mode updated to sqlite-persistent.
+    v0.6: NFR-16 X-Input-Metrics-Persisted response header.
     """
     response.headers["X-Storage-Mode"] = "sqlite-persistent"
     response.headers["X-Full-Spectrum-Notice"] = "local-dev-only"
@@ -110,23 +113,30 @@ def _set_metadata_headers(
 
 def _validate_risk_vector(rv_dict: dict) -> None:
     """
-    校验风险向量字典 (P1-3)。
+    Validate a risk vector dict (P1-3).
 
-    缺少必需字段时抛出 422，而不是让 RiskVector 构造函数抛裸 500。
+    Raises 422 with a structured error when required fields are missing,
+    instead of letting the RiskVector constructor throw a bare 500.
     """
     missing = [f for f in RISK_VECTOR_FIELDS if f not in rv_dict]
     if missing:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"Invalid risk_vector: missing fields: {missing}. Required fields: {RISK_VECTOR_FIELDS}",
+            detail={
+                "message": f"Invalid risk_vector: missing fields: {missing}. Required fields: {RISK_VECTOR_FIELDS}",
+                "error_code": "VALIDATION_ERROR",
+            },
         )
-    # 校验值类型
+    # Validate value types
     for field in RISK_VECTOR_FIELDS:
         val = rv_dict[field]
         if not isinstance(val, (int, float)):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail=f"Invalid risk_vector: field '{field}' must be a number, got {type(val).__name__}",
+                detail={
+                    "message": f"Invalid risk_vector: field '{field}' must be a number, got {type(val).__name__}",
+                    "error_code": "VALIDATION_ERROR",
+                },
             )
 
 
@@ -137,9 +147,9 @@ def _validate_risk_vector(rv_dict: dict) -> None:
 @router.get("/health", response_model=HealthResponse)
 async def health(request: Request, response: Response):
     """
-    健康检查端点。
+    Health check endpoint.
 
-    v0.6: 增强版 — 原有字段保留 + 新增 storage metadata。
+    v0.6: Enhanced — original fields retained + new storage metadata.
     """
     registry = get_registry()
     _set_metadata_headers(response)
@@ -185,55 +195,67 @@ async def health(request: Request, response: Response):
 @router.post("/evaluate")
 async def evaluate(req: EvaluateRequest, request: Request, response: Response):
     """
-    仿真评估端点。
+    Simulation evaluation endpoint.
 
-    支持两种模式：
-    1. 直接模式：传入完整 scenario dict
-    2. 适配器模式：传入 industry + metrics
+    Supports two modes:
+    1. Direct mode: pass a complete scenario dict
+    2. Adapter mode: pass industry + metrics
 
-    响应 body 严格等于 run_simulation() 的原始输出，与 CLI 完全兼容。
-    decision_id 通过 X-Decision-Id header 返回 (P0-1, P1-1)。
+    Response body is strictly equal to run_simulation() output, fully CLI-compatible.
+    decision_id is returned via the X-Decision-Id header (P0-1, P1-1).
     """
     registry = get_registry()
 
-    # 验证：两种模式必须且只能选一种
+    # Validate: exactly one mode must be used
     has_scenario = req.scenario is not None
     has_adapter = req.industry is not None and req.metrics is not None
 
     if has_scenario and has_adapter:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Cannot use both 'scenario' (direct mode) and 'industry'+'metrics' (adapter mode). Choose one.",
+            detail={
+                "message": "Cannot use both 'scenario' (direct mode) and 'industry'+'metrics' (adapter mode). Choose one.",
+                "error_code": "VALIDATION_ERROR",
+            },
         )
 
     if not has_scenario and not has_adapter:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="Must provide either 'scenario' (direct mode) or 'industry'+'metrics' (adapter mode).",
+            detail={
+                "message": "Must provide either 'scenario' (direct mode) or 'industry'+'metrics' (adapter mode).",
+                "error_code": "VALIDATION_ERROR",
+            },
         )
 
-    # 构建场景
+    # Build scenario
     if has_scenario:
-        # 直接模式：使用传入的 scenario dict
+        # Direct mode: use the provided scenario dict
         scenario = req.scenario
     else:
-        # 适配器模式：通过 MetricAdapter 构建 scenario
+        # Adapter mode: build scenario via MetricAdapter
         adapter = registry.get(req.industry)
         if adapter is None:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail=f"Unregistered adapter: '{req.industry}'. Registered adapters: {registry.list_industries()}",
+                detail={
+                    "message": f"Unregistered adapter: '{req.industry}'. Registered adapters: {registry.list_industries()}",
+                    "error_code": "ADAPTER_NOT_FOUND",
+                },
             )
 
-        # 校验必需指标
+        # Validate required metrics
         missing = adapter.validate_metrics(req.metrics)
         if missing:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                detail=f"Missing required metrics for '{req.industry}': {missing}. Required: {adapter.required_metrics}",
+                detail={
+                    "message": f"Missing required metrics for '{req.industry}': {missing}. Required: {adapter.required_metrics}",
+                    "error_code": "VALIDATION_ERROR",
+                },
             )
 
-        # 构建 scenario（include_input_metrics 默认 false，P1-5 隐私最小化）
+        # Build scenario (include_input_metrics defaults to false, P1-5 privacy minimization)
         scenario = adapter.to_scenario(
             req.metrics,
             simulation_id=req.simulation_id,
@@ -244,33 +266,39 @@ async def evaluate(req: EvaluateRequest, request: Request, response: Response):
             include_input_metrics=req.include_input_metrics,
         )
 
-    # 执行仿真
+    # Run simulation
     try:
         result = run_simulation(scenario, seed=req.seed)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"Simulation error: {str(e)}",
+            detail={
+                "message": f"Simulation error: {str(e)}",
+                "error_code": "SIMULATION_ERROR",
+            },
         )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal simulation error: {str(e)}",
+            detail={
+                "message": f"Internal simulation error: {str(e)}",
+                "error_code": "INTERNAL_ERROR",
+            },
         )
 
-    # v0.6 rc2 修复 MH-BUG-v0.6-001: include_input_metrics=true 时将 input_metrics 注入 result
-    # 确保 X-Input-Metrics-Persisted header / API response body / DB result_json 三者一致
-    # run_simulation() 输出不包含 input_metrics（仅在 scenario._adapter 中），
-    # 因此需要显式注入到 result 中，使持久化数据与 header 声明一致
+    # v0.6 rc2 fix MH-BUG-v0.6-001: inject input_metrics into result when include_input_metrics=true
+    # Ensures X-Input-Metrics-Persisted header / API response body / DB result_json are all consistent.
+    # run_simulation() output does not include input_metrics (only in scenario._adapter),
+    # so we explicitly inject it to make persisted data match the header declaration.
     if has_adapter and req.include_input_metrics:
         adapter_meta = scenario.get("_adapter", {})
         if "input_metrics" in adapter_meta:
             result["input_metrics"] = adapter_meta["input_metrics"]
 
-    # 生成 decision_id（P0-1：与 runestone_id 严格区分）
+    # Generate decision_id (P0-1: strictly separated from runestone_id)
     decision_id = _generate_decision_id(scenario, req.seed)
 
-    # v0.6: 持久化到 SQLite（替代 v0.5 内存缓存）
+    # v0.6: Persist to SQLite (replaces v0.5 in-memory cache)
     runestone_id = result.get("runestone", {}).get("runestone_id", "")
     app = request.app
     storage = getattr(app.state, "storage", None)
@@ -286,7 +314,7 @@ async def evaluate(req: EvaluateRequest, request: Request, response: Response):
                 seed=req.seed,
             )
         except Exception as e:
-            # NFR-06/NFR-15: 写入失败返回结构化 500，不返回仿真结果
+            # NFR-06/NFR-15: storage write failure returns structured 500, no simulation result
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail={
@@ -296,7 +324,7 @@ async def evaluate(req: EvaluateRequest, request: Request, response: Response):
                 },
             )
 
-    # 设置元信息 headers（P1-1：元信息走 headers，不放入 body）
+    # Set metadata headers (P1-1: metadata in headers, not body)
     # NFR-16: X-Input-Metrics-Persisted
     _set_metadata_headers(
         response,
@@ -304,7 +332,7 @@ async def evaluate(req: EvaluateRequest, request: Request, response: Response):
         input_metrics_persisted=req.include_input_metrics,
     )
 
-    # 返回原始仿真结果（严格兼容 CLI，无 envelope）
+    # Return raw simulation result (strictly CLI-compatible, no envelope)
     return result
 
 
@@ -315,22 +343,25 @@ async def evaluate(req: EvaluateRequest, request: Request, response: Response):
 @router.post("/runestone")
 async def create_runestone(req: RunestoneRequest, request: Request, response: Response):
     """
-    独立符石生成端点。
+    Standalone runestone generation endpoint.
 
-    不经过完整仿真流程，直接根据输入创建符石审计令牌。
-    响应 body 等于 Runestone.to_dict() 的输出。
+    Bypasses the full simulation pipeline and directly creates a runestone audit token.
+    Response body equals Runestone.to_dict() output.
     """
-    # 校验 reason 字段
+    # Validate reason fields
     if "enterprise_id" not in req.reason or "rule_version" not in req.reason:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="reason must contain 'enterprise_id' and 'rule_version' fields.",
+            detail={
+                "message": "reason must contain 'enterprise_id' and 'rule_version' fields.",
+                "error_code": "VALIDATION_ERROR",
+            },
         )
 
-    # 校验 risk_vector (P1-3：校验失败返回 422，不裸 500)
+    # Validate risk_vector (P1-3: validation failure returns 422, not bare 500)
     _validate_risk_vector(req.risk_vector)
 
-    # 构建对象
+    # Construct objects
     try:
         reason_field = ReasonField(
             enterprise_id=req.reason["enterprise_id"],
@@ -340,16 +371,19 @@ async def create_runestone(req: RunestoneRequest, request: Request, response: Re
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=f"Failed to construct runestone components: {str(e)}",
+            detail={
+                "message": f"Failed to construct runestone components: {str(e)}",
+                "error_code": "VALIDATION_ERROR",
+            },
         )
 
-    # 生成确定性 runestone_id（如果 seed 提供）
+    # Generate deterministic runestone_id (if seed provided)
     import numpy as np
     np.random.seed(req.seed)
 
     runestone_id = None
     if req.seed is not None:
-        # 使用确定性 ID 生成
+        # Use deterministic ID generation
         payload = json.dumps(
             {
                 "decision": req.decision,
@@ -362,7 +396,7 @@ async def create_runestone(req: RunestoneRequest, request: Request, response: Re
         ).encode("utf-8")
         runestone_id = f"RS_{hashlib.sha256(payload).hexdigest()[:16]}"
 
-    # 确定性时间戳
+    # Deterministic timestamp
     from simulate import DETERMINISTIC_UNIX_TS
     timestamp = DETERMINISTIC_UNIX_TS + float(req.seed)
 
@@ -381,7 +415,7 @@ async def create_runestone(req: RunestoneRequest, request: Request, response: Re
 
     runestone_dict = runestone.to_dict()
 
-    # v0.6: 持久化独立 runestone (decision_id 为 NULL)
+    # v0.6: Persist standalone runestone (decision_id is NULL)
     app = request.app
     storage = getattr(app.state, "storage", None)
     if storage:
@@ -413,9 +447,9 @@ async def create_runestone(req: RunestoneRequest, request: Request, response: Re
 @router.get("/decisions/{decision_id}")
 async def get_decision(decision_id: str, request: Request, response: Response):
     """
-    决策记录查询端点。
+    Decision record lookup endpoint.
 
-    v0.6: 从 SQLite 查询（替代 v0.5 内存字典）。服务重启后仍可查询。
+    v0.6: Reads from SQLite (replaces v0.5 in-memory dict). Survives service restart.
     """
     app = request.app
     storage = getattr(app.state, "storage", None)
@@ -427,17 +461,20 @@ async def get_decision(decision_id: str, request: Request, response: Response):
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Decision '{decision_id}' not found.",
+            detail={
+                "message": f"Decision '{decision_id}' not found.",
+                "error_code": "NOT_FOUND",
+            },
         )
 
     _set_metadata_headers(response, decision_id=decision_id)
 
-    # 返回持久化的原始结果（与 /evaluate 响应一致）
+    # Return the persisted raw result (consistent with /evaluate response)
     return result
 
 
 # ============================================================
-# 端点 5: GET /api/v1/audit/decisions — 决策审计列表 (v0.6 新增)
+# Endpoint 5: GET /api/v1/audit/decisions — Decision audit list (v0.6)
 # ============================================================
 
 @router.get("/audit/decisions")
@@ -450,13 +487,13 @@ async def list_decisions(
     since: Optional[str] = None,
 ):
     """
-    v0.6 新增：分页查询决策列表。
+    v0.6: Paginated decision list query.
 
-    查询参数：
-        limit: 每页条数 (1-100, 默认 20)
-        offset: 偏移量 (默认 0)
-        adapter: 按适配器筛选 (可选)
-        since: UTC ISO 8601 起始时间 (可选)
+    Query parameters:
+        limit: page size (1-100, default 20)
+        offset: offset (default 0)
+        adapter: filter by adapter (optional)
+        since: UTC ISO 8601 start time (optional)
     """
     _set_metadata_headers(response)
 
@@ -495,7 +532,7 @@ async def list_decisions(
 
 
 # ============================================================
-# 端点 6: GET /api/v1/audit/runestones — 符石审计列表 (v0.6 新增)
+# Endpoint 6: GET /api/v1/audit/runestones — Runestone audit list (v0.6)
 # ============================================================
 
 @router.get("/audit/runestones")
@@ -507,12 +544,12 @@ async def list_runestones(
     since: Optional[str] = None,
 ):
     """
-    v0.6 新增：符石列表查询。
+    v0.6: Runestone list query.
 
-    查询参数：
-        limit: 每页条数 (1-100, 默认 20)
-        offset: 偏移量 (默认 0)
-        since: UTC ISO 8601 起始时间 (可选)
+    Query parameters:
+        limit: page size (1-100, default 20)
+        offset: offset (default 0)
+        since: UTC ISO 8601 start time (optional)
     """
     _set_metadata_headers(response)
 
@@ -550,15 +587,15 @@ async def list_runestones(
 
 
 # ============================================================
-# 端点 7: GET /api/v1/audit/runestones/{runestone_id} — 单个符石查询 (v0.6 新增)
+# Endpoint 7: GET /api/v1/audit/runestones/{runestone_id} — Single runestone lookup (v0.6)
 # ============================================================
 
 @router.get("/audit/runestones/{runestone_id}")
 async def get_runestone(runestone_id: str, request: Request, response: Response):
     """
-    v0.6 新增：按 runestone_id 直接查询符石。
+    v0.6: Look up a runestone by runestone_id.
 
-    可查询 evaluate 自动生成的 runestone 和独立 POST /runestone 生成的 runestone。
+    Can query runestones auto-generated by evaluate and standalone POST /runestone runestones.
     """
     _set_metadata_headers(response)
 
@@ -568,14 +605,17 @@ async def get_runestone(runestone_id: str, request: Request, response: Response)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Runestone '{runestone_id}' not found.",
+            detail={
+                "message": f"Runestone '{runestone_id}' not found.",
+                "error_code": "NOT_FOUND",
+            },
         )
 
     return result
 
 
 # ============================================================
-# 端点 8: DELETE /api/v1/audit/decisions — 数据清理 (v0.6 新增, 带安全阀)
+# Endpoint 8: DELETE /api/v1/audit/decisions — Data cleanup (v0.6, with safety valve)
 # ============================================================
 
 @router.delete("/audit/decisions")
@@ -587,12 +627,12 @@ async def delete_data(
     all: Optional[str] = None,
 ):
     """
-    v0.6 新增：数据清理端点（带安全阀）。
+    v0.6: Data cleanup endpoint (with safety valve).
 
-    安全阀规则：
-    1. 必须传 confirm=true，否则 422
-    2. 必须传 before=<UTC ISO> 或 all=true，否则 422
-    3. bind_host 非 127.0.0.1/localhost 时返回 403
+    Safety valve rules:
+    1. Must pass confirm=true, otherwise 422
+    2. Must pass before=<UTC ISO> or all=true, otherwise 422
+    3. Returns 403 when bind_host is not 127.0.0.1/localhost
     """
     _set_metadata_headers(response)
 

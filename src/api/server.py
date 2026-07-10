@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — 服务器工厂与启动入口 (v0.7.2-alpha)
+Full Spectrum Engine API — Server factory and startup entry point (v0.9.0-alpha)
 
-设计原则：
-    - create_app() 工厂函数，seed 在此处初始化（千问B：不在路由中改变全局状态）
-    - CORSMiddleware 允许 localhost（千问C：OPTIONS 预检支持）
-    - 全局 headers 中间件（P1-1：X-Storage-Mode / X-Full-Spectrum-Notice / X-Production-Ready）
-    - 默认 127.0.0.1，0.0.0.0 时打印非生产警告（P2-2）
-    - 启动日志含 NOT FOR PRODUCTION 警告
-    - v0.6: SQLite 持久化层 (StorageBackend)，替代 v0.5 内存字典
+Design principles:
+    - create_app() factory function; seed initialized here (Qwen-B: no global state mutation in routes)
+    - CORSMiddleware allows localhost (Qwen-C: OPTIONS preflight support)
+    - Global headers middleware (P1-1: X-Storage-Mode / X-Full-Spectrum-Notice / X-Production-Ready)
+    - Default 127.0.0.1; 0.0.0.0 prints non-production warning (P2-2)
+    - Startup log includes NOT FOR PRODUCTION warning
+    - v0.6: SQLite persistence layer (StorageBackend), replaces v0.5 in-memory dict
 
-启动方式：
+Startup:
     python -m src.api.server
     python -m src.api.server --host 127.0.0.1 --port 8000
-    python -m src.api.server --host 0.0.0.0 --port 8000  # 会打印警告
+    python -m src.api.server --host 0.0.0.0 --port 8000  # prints warning
     python -m src.api.server --db-path /path/to/fse.db --ttl-days 30 --max-records 10000
 """
 
@@ -39,44 +39,44 @@ def create_app(
     max_records: int = 10000,
 ) -> FastAPI:
     """
-    创建 FastAPI 应用实例。
+    Create a FastAPI application instance.
 
     Args:
-        seed: 全局随机种子，在应用创建时初始化（千问B：不在路由中改变全局状态）
-        bind_host: 绑定地址，用于 health 端点报告网络暴露级别 + DELETE 安全阀判断
-        db_path: SQLite 数据库路径 (v0.6 新增)
-        ttl_days: TTL 天数，0 表示不自动清理 (v0.6 新增)
-        max_records: decisions 表最大记录数 (v0.6 新增)
+        seed: Global random seed, initialized at app creation (Qwen-B: no global state mutation in routes)
+        bind_host: Bind address, used by health endpoint for network exposure reporting + DELETE safety valve
+        db_path: SQLite database path (v0.6)
+        ttl_days: TTL days, 0 means no auto-cleanup (v0.6)
+        max_records: Maximum decision records (v0.6)
 
     Returns:
-        FastAPI 应用实例
+        FastAPI application instance
     """
-    # 在应用创建时初始化随机数种子（千问B）
+    # Initialize random seed at app creation time (Qwen-B)
     import numpy as np
     np.random.seed(seed)
 
     app = FastAPI(
         title="Full Spectrum Engine API",
         description=(
-            "本地 REST API — 将全频谱引擎从 CLI 脚本变为可被业务系统调用的 HTTP 服务。\n\n"
-            "⚠️ NOT FOR PRODUCTION — 本地开发接口，不做认证、不做生产级部署。\n"
-            "存储模式: sqlite-persistent（v0.6 SQLite 持久化）"
+            "Local REST API — turns the Full Spectrum Engine from a CLI script into an HTTP service callable by business systems.\n\n"
+            "WARNING: NOT FOR PRODUCTION — local development interface, no authentication, no production-grade deployment.\n"
+            "Storage mode: sqlite-persistent (v0.6 SQLite persistence)"
         ),
         version=API_VERSION,
         docs_url="/docs",
         redoc_url="/redoc",
     )
 
-    # 存储全局状态
+    # Store global state
     app.state.seed = seed
     app.state.bind_host = bind_host
 
-    # v0.6: 初始化 SQLite 存储后端（替代 v0.5 内存字典）
+    # v0.6: Initialize SQLite storage backend (replaces v0.5 in-memory dict)
     storage = StorageBackend(db_path=db_path, ttl_days=ttl_days, max_records=max_records)
     app.state.storage = storage
 
     # ============================================================
-    # CORS 中间件（千问C：支持 OPTIONS 预检）
+    # CORS middleware (Qwen-C: OPTIONS preflight support)
     # ============================================================
     app.add_middleware(
         CORSMiddleware,
@@ -87,22 +87,22 @@ def create_app(
     )
 
     # ============================================================
-    # 全局 headers 中间件（P1-1：元信息走 headers）
-    # v0.6: X-Storage-Mode 更新为 sqlite-persistent
+    # Global headers middleware (P1-1: metadata in headers)
+    # v0.6: X-Storage-Mode updated to sqlite-persistent
     # ============================================================
     @app.middleware("http")
     async def add_metadata_headers(request: Request, call_next):
         response = await call_next(request)
-        # 所有响应都携带这些元信息 headers
+        # All responses carry these metadata headers
         response.headers["X-Storage-Mode"] = "sqlite-persistent"
         response.headers["X-Full-Spectrum-Notice"] = "local-dev-only"
         response.headers["X-Production-Ready"] = "false"
         return response
 
-    # 注册路由
+    # Register routes
     app.include_router(router)
 
-    # 根路径重定向到 docs
+    # Root path redirects to docs
     @app.get("/")
     async def root():
         return {
@@ -118,66 +118,66 @@ def create_app(
 
 
 # ============================================================
-# Uvicorn 启动入口
+# Uvicorn startup entry point
 # ============================================================
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Full Spectrum Engine v0.7.2-alpha API Server",
+        description="Full Spectrum Engine v0.9.0-alpha API Server",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-示例:
-  python -m src.api.server                           # 默认 127.0.0.1:8000
-  python -m src.api.server --port 9000               # 自定义端口
-  python -m src.api.server --host 0.0.0.0 --port 8000  # 暴露到外网（会打印警告）
+Examples:
+  python -m src.api.server                           # Default 127.0.0.1:8000
+  python -m src.api.server --port 9000               # Custom port
+  python -m src.api.server --host 0.0.0.0 --port 8000  # Expose to network (prints warning)
   python -m src.api.server --db-path /tmp/fse.db --ttl-days 30
 
-⚠️ NOT FOR PRODUCTION — 本地开发接口，不做认证。
+WARNING: NOT FOR PRODUCTION — local development interface, no authentication.
         """,
     )
     parser.add_argument(
         "--host",
         default="127.0.0.1",
-        help="绑定地址（默认 127.0.0.1，使用 0.0.0.0 会打印非生产警告）",
+        help="Bind address (default 127.0.0.1; 0.0.0.0 prints non-production warning)",
     )
     parser.add_argument(
         "--port",
         type=int,
         default=8000,
-        help="绑定端口（默认 8000）",
+        help="Bind port (default 8000)",
     )
     parser.add_argument(
         "--seed",
         type=int,
         default=42,
-        help="全局随机种子（默认 42）",
+        help="Global random seed (default 42)",
     )
     parser.add_argument(
         "--reload",
         action="store_true",
-        help="开发模式热重载",
+        help="Development hot-reload mode",
     )
-    # v0.6 新增参数
+    # v0.6 parameters
     parser.add_argument(
         "--db-path",
         default="./data/fse.db",
-        help="SQLite 数据库路径（默认 ./data/fse.db）",
+        help="SQLite database path (default ./data/fse.db)",
     )
     parser.add_argument(
         "--ttl-days",
         type=int,
         default=0,
-        help="TTL 天数，0 表示不自动清理（默认 0）",
+        help="TTL days, 0 means no auto-cleanup (default 0)",
     )
     parser.add_argument(
         "--max-records",
         type=int,
         default=10000,
-        help="decisions 最大记录数（默认 10000）",
+        help="Maximum decision records (default 10000)",
     )
     args = parser.parse_args()
 
-    # P2-2：非本地绑定时打印警告
+    # P2-2: Print warning for non-local binding
     if args.host not in ("127.0.0.1", "localhost"):
         warning_line = (
             "=" * 70 + "\n"
@@ -190,10 +190,10 @@ def main():
         print(warning_line, file=sys.stderr)
         logger.warning(f"Non-local binding detected: {args.host}")
 
-    # 启动日志 (v0.6 增强)
+    # Startup log (v0.6 enhanced)
     print(
         f"\n"
-        f"Full Spectrum Engine v0.7.2-alpha API Server\n"
+        f"Full Spectrum Engine v0.9.0-alpha API Server\n"
         f"Running at http://{args.host}:{args.port}\n"
         f"Docs: http://{args.host}:{args.port}/docs\n"
         f"Database: {os.path.abspath(args.db_path)}\n"
@@ -204,7 +204,7 @@ def main():
         file=sys.stderr,
     )
 
-    # 创建应用
+    # Create application
     app = create_app(
         seed=args.seed,
         bind_host=args.host,
@@ -213,7 +213,7 @@ def main():
         max_records=args.max_records,
     )
 
-    # 启动 uvicorn
+    # Start uvicorn
     import uvicorn
     uvicorn.run(
         app,

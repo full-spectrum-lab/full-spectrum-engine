@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "full-spectrum-engine"
-version = "0.8.0b1"
-description = "Full Spectrum Protocol — 可运行仿真引擎 (v0.8.0-beta public beta)"
+version = "0.9.0a1"
+description = "Full Spectrum Protocol — local-first simulation engine (v0.9.0-alpha hardening)"
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24.0"]
 license = {text = "Mulan PSL v2 / Apache 2.0 (dual license)"}

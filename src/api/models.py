@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — Pydantic 请求/响应模型
+Full Spectrum Engine API — Pydantic request/response models.
 
-设计原则：
-    - 请求字段使用 irreversibility（P0-2 修复，与 v0.4 对齐）
-    - include_input_metrics 默认 false（P1-5 隐私最小化）
-    - 可变默认值使用 Field(default_factory=...)（P1-3 防 bare 500）
-    - 响应 body 严格兼容 CLI 输出，不加 envelope（P1-1）
+Design principles:
+    - Request fields use irreversibility (P0-2 fix, aligned with v0.4)
+    - include_input_metrics defaults to false (P1-5 privacy minimization)
+    - Mutable default values use Field(default_factory=...) (P1-3 prevents bare 500)
+    - Response body strictly compatible with CLI output, no envelope (P1-1)
 """
 
 from pydantic import BaseModel, Field
@@ -14,146 +14,146 @@ from typing import Optional, Dict, Any, List
 
 
 # ============================================================
-# 请求模型
+# Request models
 # ============================================================
 
 class EvaluateRequest(BaseModel):
     """
-    POST /api/v1/evaluate 请求体
+    POST /api/v1/evaluate request body
 
-    支持两种模式：
-    1. 直接模式（direct）：传入完整 scenario dict，等价于 simulate.py --config
-    2. 适配器模式（adapter）：传入 industry + metrics，由 MetricAdapter 自动构建 scenario
+    Supports two modes:
+    1. Direct mode: pass a complete scenario dict, equivalent to simulate.py --config
+    2. Adapter mode: pass industry + metrics, MetricAdapter builds the scenario automatically
 
-    两种模式都必须且只能选一种。
+    Exactly one mode must be used.
     """
-    # 直接模式：完整 scenario dict（与 simulate.py 的 JSON 格式一致）
+    # Direct mode: complete scenario dict (matches simulate.py JSON format)
     scenario: Optional[Dict[str, Any]] = Field(
         default=None,
-        description="直接模式：完整场景配置，与 simulate.py --config 的 JSON 格式一致"
+        description="Direct mode: complete scenario config, matches simulate.py --config JSON format"
     )
-    # 适配器模式
+    # Adapter mode
     industry: Optional[str] = Field(
         default=None,
-        description="适配器模式：行业标识，如 'ecommerce_customer_service'"
+        description="Adapter mode: industry identifier, e.g. 'ecommerce_customer_service'"
     )
     metrics: Optional[Dict[str, float]] = Field(
         default=None,
-        description="适配器模式：业务指标字典，键为指标名，值为 [0,1] 归一化值"
+        description="Adapter mode: business metrics dict, keys are metric names, values are [0,1] normalized"
     )
 
-    # 公共参数
+    # Common parameters
     seed: int = Field(
         default=42,
-        description="随机种子，用于确定性仿真。默认 42"
+        description="Random seed for deterministic simulation. Default 42"
     )
     include_input_metrics: bool = Field(
         default=False,
-        description="是否在响应中包含原始业务指标（隐私最小化：默认 false）"
+        description="Whether to include raw business metrics in response (privacy minimization: default false)"
     )
 
-    # 适配器模式可选参数
+    # Adapter mode optional parameters
     simulation_id: Optional[str] = Field(
         default=None,
-        description="适配器模式：仿真 ID（直接模式从 scenario 中读取）"
+        description="Adapter mode: simulation ID (direct mode reads from scenario)"
     )
     input_query: Optional[str] = Field(
         default=None,
-        description="适配器模式：场景描述"
+        description="Adapter mode: scenario description"
     )
     sensitivity_level: str = Field(
         default="medium",
-        description="适配器模式：敏感度等级 (low/medium/high)"
+        description="Adapter mode: sensitivity level (low/medium/high)"
     )
     enterprise_id: str = Field(
         default="default",
-        description="适配器模式：企业 ID"
+        description="Adapter mode: enterprise ID"
     )
     rule_version: str = Field(
         default="v0.3",
-        description="适配器模式：规则版本"
+        description="Adapter mode: rule version"
     )
 
 
 class RunestoneRequest(BaseModel):
     """
-    POST /api/v1/runestone 请求体
+    POST /api/v1/runestone request body
 
-    独立生成符石审计令牌，不经过完整仿真流程。
+    Generate a standalone runestone audit token without the full simulation pipeline.
     """
     decision: str = Field(
         ...,
-        description="决策选项，如 'W3'"
+        description="Decision option, e.g. 'W3'"
     )
     reason: Dict[str, str] = Field(
         ...,
-        description="审计原因，包含 enterprise_id 和 rule_version"
+        description="Audit reason, must contain enterprise_id and rule_version"
     )
     risk_vector: Dict[str, float] = Field(
         ...,
-        description="八维风险向量，必须包含 survival_impact/trust_impact/meaning_impact/reversibility/explainability/diffusivity/urgency/uncertainty"
+        description="Eight-dimensional risk vector, must contain survival_impact/trust_impact/meaning_impact/reversibility/explainability/diffusivity/urgency/uncertainty"
     )
     parent_runestone: Optional[str] = Field(
         default=None,
-        description="父符石 ID（用于链式审计）"
+        description="Parent runestone ID (for chain auditing)"
     )
     agent_trail: List[str] = Field(
         default_factory=list,
-        description="参与 Agent 列表"
+        description="Participating agent list"
     )
     ess_snapshot: Dict[str, Any] = Field(
         default_factory=dict,
-        description="ESS 快照数据"
+        description="ESS snapshot data"
     )
     seed: int = Field(
         default=42,
-        description="随机种子（影响 runestone_id 生成）"
+        description="Random seed (affects runestone_id generation)"
     )
 
 
 # ============================================================
-# 响应模型（仅用于 /health，其他端点返回原始 dict）
+# Response models (only for /health; other endpoints return raw dicts)
 # ============================================================
 
 class HealthResponse(BaseModel):
     """
-    GET /api/v1/health 响应体
+    GET /api/v1/health response body
 
-    health 是唯一有自定义响应结构的端点。
-    其他端点的响应 body 严格兼容 CLI 输出。
+    health is the only endpoint with a custom response structure.
+    All other endpoints return a body strictly compatible with CLI output.
 
-    v0.6: storage_mode 默认值更新为 sqlite-persistent。
-    v0.6: 新增 db_path/db_size_bytes/decision_count/runestone_count/ttl_days/max_records (可选字段)。
+    v0.6: storage_mode default updated to sqlite-persistent.
+    v0.6: Added db_path/db_size_bytes/decision_count/runestone_count/ttl_days/max_records (optional fields).
     """
-    status: str = Field(description="服务状态: 'ok'")
-    version: str = Field(description="API 版本号")
-    engine_version: str = Field(description="引擎版本号")
+    status: str = Field(description="Service status: 'ok'")
+    version: str = Field(description="API version number")
+    engine_version: str = Field(description="Engine version number")
     registered_adapters: List[str] = Field(
-        description="已注册的适配器行业标识列表"
+        description="List of registered adapter industry identifiers"
     )
     storage_mode: str = Field(
         default="sqlite-persistent",
-        description="存储模式: 'sqlite-persistent' (v0.6 SQLite 持久化)"
+        description="Storage mode: 'sqlite-persistent' (v0.6 SQLite persistence)"
     )
     network_exposure: str = Field(
         default="local",
-        description="网络暴露级别: 'local' (127.0.0.1) 或 'non-local' (0.0.0.0)"
+        description="Network exposure level: 'local' (127.0.0.1) or 'non-local' (0.0.0.0)"
     )
-    # v0.6 新增字段 (可选，向后兼容)
-    db_path: Optional[str] = Field(default=None, description="SQLite 数据库绝对路径")
-    db_size_bytes: Optional[int] = Field(default=None, description="数据库文件大小 (bytes)")
-    decision_count: Optional[int] = Field(default=None, description="决策记录总数")
-    runestone_count: Optional[int] = Field(default=None, description="符石记录总数")
-    ttl_days: Optional[int] = Field(default=None, description="TTL 天数 (0=不自动清理)")
-    max_records: Optional[int] = Field(default=None, description="decisions 最大记录数")
+    # v0.6 optional fields (backward compatible)
+    db_path: Optional[str] = Field(default=None, description="SQLite database absolute path")
+    db_size_bytes: Optional[int] = Field(default=None, description="Database file size (bytes)")
+    decision_count: Optional[int] = Field(default=None, description="Total decision records")
+    runestone_count: Optional[int] = Field(default=None, description="Total runestone records")
+    ttl_days: Optional[int] = Field(default=None, description="TTL days (0=no auto-cleanup)")
+    max_records: Optional[int] = Field(default=None, description="Maximum decision records")
 
 
 # ============================================================
-# v0.6 新增：审计列表查询模型
+# v0.6: Audit list query models
 # ============================================================
 
 class DecisionListItem(BaseModel):
-    """决策列表项（不含完整结果）"""
+    """Decision list item (without full result)"""
     decision_id: str
     simulation_id: Optional[str] = None
     runestone_id: Optional[str] = None
@@ -163,7 +163,7 @@ class DecisionListItem(BaseModel):
 
 
 class DecisionListResponse(BaseModel):
-    """决策列表响应"""
+    """Decision list response"""
     items: List[Dict[str, Any]]
     total: int
     limit: int
@@ -171,15 +171,15 @@ class DecisionListResponse(BaseModel):
 
 
 class RunestoneListItem(BaseModel):
-    """符石列表项"""
+    """Runestone list item"""
     runestone_id: str
-    decision_id: Optional[str] = None  # 独立 runestone 时为 None
+    decision_id: Optional[str] = None  # None for standalone runestones
     created_at: str
     parent_runestone: Optional[str] = None
 
 
 class RunestoneListResponse(BaseModel):
-    """符石列表响应"""
+    """Runestone list response"""
     items: List[Dict[str, Any]]
     total: int
     limit: int
@@ -187,6 +187,6 @@ class RunestoneListResponse(BaseModel):
 
 
 class DeleteDataResponse(BaseModel):
-    """数据清理响应"""
+    """Data cleanup response"""
     deleted_decisions: int
     deleted_runestones: int

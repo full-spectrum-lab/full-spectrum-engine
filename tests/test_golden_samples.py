@@ -23,6 +23,12 @@ class TestGoldenSamples(unittest.TestCase):
         golden = json.loads((GOLDEN_DIR / "golden_knowledge_seed42.json").read_text(encoding="utf-8"))
         self.assertEqual(actual, golden)
 
+    def test_logistics_coldchain_seed42_matches_golden_sample(self):
+        scenario = load_scenario("examples/scenario_logistics_coldchain.json")
+        actual = run_simulation(copy.deepcopy(scenario), seed=42)
+        golden = json.loads((GOLDEN_DIR / "golden_logistics_coldchain_seed42.json").read_text(encoding="utf-8"))
+        self.assertEqual(actual, golden)
+
 
 if __name__ == "__main__":
     unittest.main()

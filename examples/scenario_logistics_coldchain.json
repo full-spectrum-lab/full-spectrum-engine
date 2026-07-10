@@ -1,0 +1,28 @@
+{
+  "simulation_id": "CASE006_LOGISTICS_COLDCHAIN",
+  "input_query": "Cold chain logistics overflow during peak season: mass delays, information inconsistency, and compensation disputes",
+  "sensitivity_level": "high",
+  "enterprise_id": "logistics-platform",
+  "rule_version": "v0.3",
+  "initial_state": {
+    "survival": 0.65,
+    "coordination": 0.35,
+    "meaning": 0.45
+  },
+  "agents": [
+    {"type": "AI", "weight": 0.30},
+    {"type": "Human", "weight": 0.25},
+    {"type": "Regulator", "weight": 0.25},
+    {"type": "Enterprise", "weight": 0.20}
+  ],
+  "weights": {
+    "survival": 0.45,
+    "coordination": 0.30,
+    "meaning": 0.25
+  },
+  "ess_horizon": 5,
+  "ess_candidates": 10,
+  "conflict_density": 0.7,
+  "reversibility": 0.85,
+  "diffusivity": 0.6
+}

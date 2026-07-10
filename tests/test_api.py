@@ -243,24 +243,28 @@ class TestEvaluateErrorHandling(unittest.TestCase):
         self.assertEqual(resp.status_code, 422)
 
     def test_evaluate_unregistered_adapter_returns_422(self):
-        """E-15: 未注册适配器返回 422"""
+        """E-15: Unregistered adapter returns 422 with structured error"""
         resp = self.client.post("/api/v1/evaluate", json={
             "industry": "nonexistent_industry",
             "metrics": {},
             "seed": 42
         })
         self.assertEqual(resp.status_code, 422)
-        self.assertIn("nonexistent_industry", resp.json()["detail"])
+        detail = resp.json()["detail"]
+        self.assertIn("nonexistent_industry", detail["message"])
+        self.assertEqual(detail["error_code"], "ADAPTER_NOT_FOUND")
 
     def test_evaluate_missing_metrics_returns_422(self):
-        """E-16: 缺失必需指标返回 422"""
+        """E-16: Missing required metrics returns 422 with structured error"""
         resp = self.client.post("/api/v1/evaluate", json={
             "industry": "ecommerce_customer_service",
-            "metrics": {"refund_rate": 0.1},  # 缺少大部分必需字段
+            "metrics": {"refund_rate": 0.1},  # Missing most required fields
             "seed": 42
         })
         self.assertEqual(resp.status_code, 422)
-        self.assertIn("Missing required metrics", resp.json()["detail"])
+        detail = resp.json()["detail"]
+        self.assertIn("Missing required metrics", detail["message"])
+        self.assertEqual(detail["error_code"], "VALIDATION_ERROR")
 
 
 class TestRunestoneEndpoint(unittest.TestCase):
@@ -324,15 +328,17 @@ class TestRunestoneEndpoint(unittest.TestCase):
         )
 
     def test_runestone_missing_risk_vector_fields_returns_422(self):
-        """E-20: risk_vector 缺少字段返回 422（不裸 500，P1-3）"""
+        """E-20: risk_vector missing fields returns 422 with structured error (P1-3)"""
         resp = self.client.post("/api/v1/runestone", json={
             "decision": "W3",
             "reason": {"enterprise_id": "test-co", "rule_version": "v0.3"},
-            "risk_vector": {"survival_impact": 0.3},  # 缺少大部分字段
+            "risk_vector": {"survival_impact": 0.3},  # Missing most fields
             "seed": 42
         })
         self.assertEqual(resp.status_code, 422)
-        self.assertIn("missing fields", resp.json()["detail"])
+        detail = resp.json()["detail"]
+        self.assertIn("missing fields", detail["message"])
+        self.assertEqual(detail["error_code"], "VALIDATION_ERROR")
 
     def test_runestone_wrong_type_risk_vector_returns_422(self):
         """E-21: risk_vector 字段类型错误返回 422（不裸 500，P1-3）"""
@@ -468,6 +474,142 @@ class TestLogisticsAdapterAPI(unittest.TestCase):
         rv = data.get("risk_vector", {})
         self.assertEqual(rv.get("reversibility"), 0.85,
                          "LogisticsAdapter irreversibility=0.85 must appear as reversibility field")
+
+
+class TestStructuredErrorFormat(unittest.TestCase):
+    """v0.9: All error responses must use structured format {"message", "error_code"}"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.app = _create_test_app()
+        cls.client = TestClient(cls.app)
+        cls.valid_rv = {
+            "survival_impact": 0.3,
+            "trust_impact": 0.5,
+            "meaning_impact": 0.2,
+            "reversibility": 0.6,
+            "explainability": 0.8,
+            "diffusivity": 0.4,
+            "urgency": 0.3,
+            "uncertainty": 0.2,
+        }
+
+    def _assert_structured_error(self, resp, expected_code=None):
+        """Helper: assert error response has structured {"message", "error_code"} format."""
+        detail = resp.json()["detail"]
+        self.assertIsInstance(detail, dict, "Error detail must be a dict, not a string")
+        self.assertIn("message", detail, "Error detail must contain 'message' key")
+        self.assertIn("error_code", detail, "Error detail must contain 'error_code' key")
+        self.assertIsInstance(detail["message"], str, "message must be a string")
+        self.assertIsInstance(detail["error_code"], str, "error_code must be a string")
+        if expected_code:
+            self.assertEqual(detail["error_code"], expected_code,
+                             f"error_code should be '{expected_code}', got '{detail['error_code']}'")
+
+    def test_evaluate_both_modes_422_structured(self):
+        """v0.9: both modes error returns structured format"""
+        resp = self.client.post("/api/v1/evaluate", json={
+            "scenario": {"simulation_id": "test"},
+            "industry": "ecommerce_customer_service",
+            "metrics": {},
+            "seed": 42
+        })
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_evaluate_neither_mode_422_structured(self):
+        """v0.9: neither mode error returns structured format"""
+        resp = self.client.post("/api/v1/evaluate", json={"seed": 42})
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_evaluate_unregistered_adapter_422_structured(self):
+        """v0.9: unregistered adapter error returns structured format"""
+        resp = self.client.post("/api/v1/evaluate", json={
+            "industry": "nonexistent",
+            "metrics": {},
+            "seed": 42
+        })
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "ADAPTER_NOT_FOUND")
+
+    def test_evaluate_missing_metrics_422_structured(self):
+        """v0.9: missing metrics error returns structured format"""
+        resp = self.client.post("/api/v1/evaluate", json={
+            "industry": "ecommerce_customer_service",
+            "metrics": {"refund_rate": 0.1},
+            "seed": 42
+        })
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_runestone_missing_rv_fields_422_structured(self):
+        """v0.9: risk_vector missing fields error returns structured format"""
+        resp = self.client.post("/api/v1/runestone", json={
+            "decision": "W3",
+            "reason": {"enterprise_id": "test-co", "rule_version": "v0.3"},
+            "risk_vector": {"survival_impact": 0.3},
+            "seed": 42
+        })
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_runestone_wrong_rv_type_422(self):
+        """v0.9: risk_vector wrong type returns 422 (Pydantic validation layer)"""
+        resp = self.client.post("/api/v1/runestone", json={
+            "decision": "W3",
+            "reason": {"enterprise_id": "test-co", "rule_version": "v0.3"},
+            "risk_vector": {k: "not_a_number" for k in self.valid_rv},
+            "seed": 42
+        })
+        self.assertEqual(resp.status_code, 422)
+
+    def test_runestone_missing_reason_422_structured(self):
+        """v0.9: reason missing fields error returns structured format"""
+        resp = self.client.post("/api/v1/runestone", json={
+            "decision": "W3",
+            "reason": {"enterprise_id": "test-co"},
+            "risk_vector": self.valid_rv,
+            "seed": 42
+        })
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_decision_not_found_404_structured(self):
+        """v0.9: decision not found error returns structured format"""
+        resp = self.client.get("/api/v1/decisions/DEC_NONEXISTENT_12345")
+        self.assertEqual(resp.status_code, 404)
+        self._assert_structured_error(resp, "NOT_FOUND")
+
+    def test_audit_decisions_bad_limit_422_structured(self):
+        """v0.9: bad limit parameter error returns structured format"""
+        resp = self.client.get("/api/v1/audit/decisions?limit=0")
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_audit_decisions_bad_offset_422_structured(self):
+        """v0.9: bad offset parameter error returns structured format"""
+        resp = self.client.get("/api/v1/audit/decisions?offset=-1")
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_audit_decisions_bad_since_422_structured(self):
+        """v0.9: bad since format error returns structured format"""
+        resp = self.client.get("/api/v1/audit/decisions?since=not-a-date")
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_delete_without_confirm_422_structured(self):
+        """v0.9: DELETE without confirm error returns structured format"""
+        resp = self.client.delete("/api/v1/audit/decisions?all=true")
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
+
+    def test_delete_without_target_422_structured(self):
+        """v0.9: DELETE without target error returns structured format"""
+        resp = self.client.delete("/api/v1/audit/decisions?confirm=true")
+        self.assertEqual(resp.status_code, 422)
+        self._assert_structured_error(resp, "VALIDATION_ERROR")
 
 
 if __name__ == "__main__":
