@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "decision_id": "DEC_b4935f0a6b706052",
+      "simulation_id": "CASE001_REFUND_CONFLICT",
+      "runestone_id": "RS_00eea7080cd85e8a",
+      "created_at": "2026-07-10T08:17:03Z",
+      "adapter": null,
+      "seed": 42
+    }
+  ],
+  "total": 1,
+  "limit": 5,
+  "offset": 0
+}

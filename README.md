@@ -6,10 +6,10 @@
 
 [![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2%20%2F%20Apache%202.0-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-green)](https://www.python.org/)
-[![Status](https://img.shields.io/badge/Status-v0.8.0--beta-blue)](#)
-[![Tests](https://img.shields.io/badge/Tests-127%20passed-brightgreen)](#)
+[![Status](https://img.shields.io/badge/Status-v0.9.0a1-hardening-blue)](#)
+[![Tests](https://img.shields.io/badge/Tests-141%20passed-brightgreen)](#)
 
-Full Spectrum Engine is the runnable engine layer in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, `AuditTrace`, and optional ESS-lite path suggestions.
+Full Spectrum Engine is the runnable engine layer in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, local audit records, and optional ESS-lite path suggestions.
 
 This repository is for **local internal validation first**:
 
@@ -29,7 +29,7 @@ It does **not** upload enterprise data by default, does **not** execute final bu
 
 ## Public beta at a glance
 
-`v0.8.0-beta` is the first version intended to be publicly inspected as a coherent package:
+`v0.9.0a1` is the current hardening line after the first public beta release:
 
 - **Runnable**: a reviewer can clone and run it locally in minutes
 - **Reproducible**: fixed seeds and golden samples make output comparison stable
@@ -54,9 +54,9 @@ If you want the fastest possible overview before reading code, start here:
 - models a three-dimensional governance state `S(t) = [Survival, Coordination, Meaning]`
 - computes FSHI (Full Spectrum Health Index)
 - generates structured `RiskVector` and `Runestone` outputs
-- records local `AuditTrace` results
+- records local audit results through persistent decision and runestone storage
 - supports deterministic simulation with `--seed`
-- provides industry-adapter experiments, including e-commerce customer service
+- provides industry-adapter experiments, including e-commerce and logistics samples
 - exposes a local REST API for development and testing
 - stores local audit records in SQLite
 - supports optional ESS-lite path simulation for non-binding treatment suggestions
@@ -129,11 +129,12 @@ Local API docs:
 5. [Troubleshooting](docs/troubleshooting.md)
 6. [Examples overview](examples/README.md)
 7. [Test records and golden samples](test-records/README.md)
-8. [v0.8 public beta gap list](docs/v0.8-public-beta-gap-list.md)
-9. [v0.8 release notes](docs/release-v0.8.0-beta.md)
-10. [GitHub release body draft](docs/github-release-v0.8.0-beta.md)
-11. [v0.9 hardening checklist](docs/v0.9-hardening-checklist.md)
-12. [v1.0 gate criteria](docs/v1.0-gate-criteria.md)
+8. [API sample pack](examples/api-samples/README.md)
+9. [v0.8 public beta gap list](docs/v0.8-public-beta-gap-list.md)
+10. [v0.8 release notes](docs/release-v0.8.0-beta.md)
+11. [GitHub release body draft](docs/github-release-v0.8.0-beta.md)
+12. [v0.9 hardening checklist](docs/v0.9-hardening-checklist.md)
+13. [v1.0 gate criteria](docs/v1.0-gate-criteria.md)
 
 ---
 
@@ -171,10 +172,10 @@ This repository is not yet suitable for:
 Current local baseline:
 
 ```text
-127 passed, 1 warning
+141 passed, 1 warning
 ```
 
-The remaining warning comes from FastAPI / Starlette dependency behavior and is not currently treated as a blocker for this beta.
+The remaining warning comes from FastAPI / Starlette dependency behavior and is not currently treated as a blocker for this hardening line.
 
 ---
 

@@ -1,6 +1,6 @@
 {
   "simulation_id": "CASE001_REFUND_CONFLICT",
-  "input_query": "用户申请退款，但商家以“已拆封”为由拒绝，平台需要裁定是否强制退款",
+  "input_query": "The customer requested a refund, but the merchant refused on the basis that the package was already opened. The platform must determine whether a forced refund is required.",
   "sensitivity_level": "high",
   "enterprise_id": "ecommerce-platform",
   "rule_version": "v0.3",
@@ -10,13 +10,13 @@
     "meaning": 0.55
   },
   "agents": [
-    {"type": "AI", "weight": 0.40},
-    {"type": "Human", "weight": 0.20},
-    {"type": "Regulator", "weight": 0.25},
-    {"type": "Enterprise", "weight": 0.15}
+    { "type": "AI", "weight": 0.4 },
+    { "type": "Human", "weight": 0.2 },
+    { "type": "Regulator", "weight": 0.25 },
+    { "type": "Enterprise", "weight": 0.15 }
   ],
   "weights": {
-    "survival": 0.40,
+    "survival": 0.4,
     "coordination": 0.35,
     "meaning": 0.25
   },

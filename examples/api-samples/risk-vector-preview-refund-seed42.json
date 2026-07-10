@@ -1,0 +1,25 @@
+{
+  "sample_type": "engine-risk-vector-preview",
+  "note": "The engine currently exposes RiskVector as the machine-readable local risk object. Protocol-layer RiskAlert remains a higher-level profile.",
+  "simulation_id": "CASE001_REFUND_CONFLICT",
+  "decision_id": "DEC_b4935f0a6b706052",
+  "runestone_id": "RS_00eea7080cd85e8a",
+  "risk_level": "WARNING",
+  "risk_vector": {
+    "survival_impact": 0.27131250000000007,
+    "trust_impact": 0.5411524999999999,
+    "meaning_impact": 0.44345999999999997,
+    "reversibility": 0.4,
+    "explainability": 0.8,
+    "diffusivity": 0.5,
+    "urgency": 0.5,
+    "uncertainty": 0.2
+  },
+  "validation": {
+    "dream_butterfly_passed": true,
+    "dream_butterfly_reason": "ALL_PASSED",
+    "bomb_triggered": false,
+    "bomb_reason": "not triggered",
+    "brake_state": "WARNING"
+  }
+}

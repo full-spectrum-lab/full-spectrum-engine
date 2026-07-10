@@ -1,0 +1,30 @@
+{
+  "agent_trail": [
+    "AI_Agent",
+    "Human_Agent",
+    "Regulator_Agent",
+    "Enterprise_Agent"
+  ],
+  "causal_chain": null,
+  "decision": "PATH-001",
+  "ess_snapshot": {
+    "horizon": 5,
+    "num_paths": 5,
+    "selected_pain": 6.288104621937737
+  },
+  "parent_runestone": null,
+  "reason": "ESS-ecommerce-platform-v0.3",
+  "risk_vector": {
+    "diffusivity": 0.5,
+    "explainability": 0.8,
+    "meaning_impact": 0.44345999999999997,
+    "reversibility": 0.4,
+    "survival_impact": 0.27131250000000007,
+    "trust_impact": 0.5411524999999999,
+    "uncertainty": 0.2,
+    "urgency": 0.5
+  },
+  "runestone_id": "RS_00eea7080cd85e8a",
+  "signature": null,
+  "timestamp": 1783123242.0
+}

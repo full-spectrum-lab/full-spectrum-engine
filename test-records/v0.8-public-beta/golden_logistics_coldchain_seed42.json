@@ -1,24 +1,24 @@
 {
-  "simulation_id": "CASE001_REFUND_CONFLICT",
+  "simulation_id": "CASE006_LOGISTICS_COLDCHAIN",
   "timestamp": "2026-07-04T00:00:00Z",
-  "input_query": "The customer requested a refund, but the merchant refused on the basis that the package was already opened. The platform must determine whether a forced refund is required.",
+  "input_query": "Cold chain logistics overflow during peak season: mass delays, information inconsistency, and compensation disputes",
   "sensitivity_level": "high",
   "initial_state": {
-    "survival": 0.72,
-    "coordination": 0.45,
-    "meaning": 0.55
+    "survival": 0.65,
+    "coordination": 0.35,
+    "meaning": 0.45
   },
   "final_state": {
-    "survival": 0.7286874999999999,
-    "coordination": 0.4588475,
-    "meaning": 0.55654
+    "survival": 0.6602125,
+    "coordination": 0.36035,
+    "meaning": 0.4576875
   },
   "fshi": {
-    "value": 59.12,
+    "value": 51.96,
     "risk_level": "WARNING",
     "weights": {
-      "survival": 0.4,
-      "coordination": 0.35,
+      "survival": 0.45,
+      "coordination": 0.3,
       "meaning": 0.25
     },
     "penalty": 0.0
@@ -30,7 +30,7 @@
       {
         "option": "PATH-001",
         "selected": true,
-        "total_pain": 6.2881,
+        "total_pain": 7.63,
         "low_freq": 0.479,
         "mid_freq": 0.3384,
         "high_freq": 0.2765
@@ -38,7 +38,7 @@
       {
         "option": "PATH-002",
         "selected": false,
-        "total_pain": 6.2938,
+        "total_pain": 7.6357,
         "low_freq": 0.4762,
         "mid_freq": 0.2883,
         "high_freq": 0.2883
@@ -46,7 +46,7 @@
       {
         "option": "PATH-003",
         "selected": false,
-        "total_pain": 6.2949,
+        "total_pain": 7.6368,
         "low_freq": 0.4248,
         "mid_freq": 0.2931,
         "high_freq": 0.3324
@@ -54,7 +54,7 @@
       {
         "option": "PATH-004",
         "selected": false,
-        "total_pain": 6.3021,
+        "total_pain": 7.6441,
         "low_freq": 0.4,
         "mid_freq": 0.3,
         "high_freq": 0.3
@@ -62,7 +62,7 @@
       {
         "option": "PATH-005",
         "selected": false,
-        "total_pain": 6.3049,
+        "total_pain": 7.6469,
         "low_freq": 0.4271,
         "mid_freq": 0.2768,
         "high_freq": 0.2767
@@ -77,27 +77,27 @@
     "brake_state": "WARNING"
   },
   "risk_vector": {
-    "survival_impact": 0.27131250000000007,
-    "trust_impact": 0.5411524999999999,
-    "meaning_impact": 0.44345999999999997,
-    "reversibility": 0.4,
+    "survival_impact": 0.3397875,
+    "trust_impact": 0.63965,
+    "meaning_impact": 0.5423125,
+    "reversibility": 0.85,
     "explainability": 0.8,
-    "diffusivity": 0.5,
+    "diffusivity": 0.6,
     "urgency": 0.5,
     "uncertainty": 0.2
   },
   "runestone": {
-    "runestone_id": "RS_00eea7080cd85e8a",
+    "runestone_id": "RS_1458cff081e22fc1",
     "timestamp": 1783123242.0,
     "decision": "PATH-001",
-    "reason": "ESS-ecommerce-platform-v0.3",
+    "reason": "ESS-logistics-platform-v0.3",
     "risk_vector": {
-      "survival_impact": 0.27131250000000007,
-      "trust_impact": 0.5411524999999999,
-      "meaning_impact": 0.44345999999999997,
-      "reversibility": 0.4,
+      "survival_impact": 0.3397875,
+      "trust_impact": 0.63965,
+      "meaning_impact": 0.5423125,
+      "reversibility": 0.85,
       "explainability": 0.8,
-      "diffusivity": 0.5,
+      "diffusivity": 0.6,
       "urgency": 0.5,
       "uncertainty": 0.2
     },
@@ -111,20 +111,20 @@
     "ess_snapshot": {
       "horizon": 5,
       "num_paths": 5,
-      "selected_pain": 6.288104621937737
+      "selected_pain": 7.630026189563647
     },
     "causal_chain": null,
     "signature": null
   },
   "causal_chain": {
-    "causal_chain_id": "CC_42affb7fedac404f",
+    "causal_chain_id": "CC_42e6cad7fccae808",
     "timestamp": "2026-07-04T00:00:00Z",
     "version": "1.0",
     "system_state": {
       "current_state": "WARNING",
       "judgment_basis": [
-        "FSHI=59.1 (WARNING)",
-        "ESS selected PATH-001 (pain=6.288)",
+        "FSHI=52.0 (WARNING)",
+        "ESS selected PATH-001 (pain=7.630)",
         "Bomb: not triggered"
       ],
       "spectrum_priority": "meaning"
@@ -162,7 +162,7 @@
             "description": "High-frequency impact intensity 0.28"
           }
         },
-        "total_pain": 6.288104621937737,
+        "total_pain": 7.630026189563647,
         "chain_visual": "low(0.48) -> mid(0.34) -> high(0.28)"
       },
       {
@@ -186,7 +186,7 @@
             "description": "High-frequency impact intensity 0.29"
           }
         },
-        "total_pain": 6.2937863429844185,
+        "total_pain": 7.63570791061033,
         "chain_visual": "low(0.48) -> mid(0.29) -> high(0.29)"
       },
       {
@@ -210,7 +210,7 @@
             "description": "High-frequency impact intensity 0.33"
           }
         },
-        "total_pain": 6.294855527158262,
+        "total_pain": 7.636777094784172,
         "chain_visual": "low(0.42) -> mid(0.29) -> high(0.33)"
       },
       {
@@ -234,7 +234,7 @@
             "description": "High-frequency impact intensity 0.30"
           }
         },
-        "total_pain": 6.302143759419642,
+        "total_pain": 7.6440653270455545,
         "chain_visual": "low(0.40) -> mid(0.30) -> high(0.30)"
       },
       {
@@ -258,7 +258,7 @@
             "description": "High-frequency impact intensity 0.28"
           }
         },
-        "total_pain": 6.304932833514325,
+        "total_pain": 7.646854401140239,
         "chain_visual": "low(0.43) -> mid(0.28) -> high(0.28)"
       }
     ],
@@ -277,14 +277,8 @@
           "basis": "Coordination layer shows unresolved friction."
         }
       ],
-      "credits": [
-        {
-          "item": "meaning_retention",
-          "points": 4,
-          "basis": "Meaning layer remains above minimum continuity threshold."
-        }
-      ],
-      "balance": 96,
+      "credits": [],
+      "balance": 92,
       "health_status": "healthy"
     },
     "who_hurts": {
@@ -315,6 +309,6 @@
         }
       ]
     },
-    "full_chain_narrative": "The engine classified the system as WARNING. ESS selected path PATH-001 with total pain 6.288. Final state = [survival=0.729, coordination=0.459, meaning=0.557]. Runestone RS_00eea7080cd85e8a anchors the audit token for this evaluation."
+    "full_chain_narrative": "The engine classified the system as WARNING. ESS selected path PATH-001 with total pain 7.630. Final state = [survival=0.660, coordination=0.360, meaning=0.458]. Runestone RS_1458cff081e22fc1 anchors the audit token for this evaluation."
   }
 }

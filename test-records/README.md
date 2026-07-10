@@ -26,6 +26,7 @@ The current public beta golden files are:
 ```text
 golden_refund_seed42.json
 golden_knowledge_seed42.json
+golden_logistics_coldchain_seed42.json
 ```
 
 They are generated with `--seed 42` and are used to verify that later versions do not silently break the main public output structure.
@@ -74,6 +75,7 @@ python simulate.py --config examples/scenario_knowledge_conflict.json --seed 42 
 # v0.8 public beta
 python simulate.py --config examples/scenario_refund_conflict.json --seed 42 --output test-records/v0.8-public-beta/golden_refund_seed42.json
 python simulate.py --config examples/scenario_knowledge_conflict.json --seed 42 --output test-records/v0.8-public-beta/golden_knowledge_seed42.json
+python simulate.py --config examples/scenario_logistics_coldchain.json --seed 42 --output test-records/v0.8-public-beta/golden_logistics_coldchain_seed42.json
 powershell -ExecutionPolicy Bypass -File scripts/validate-public-beta.ps1
 ```
 

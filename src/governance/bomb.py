@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """
-全频谱协议 · 觉性炸弹引擎
-L5 觉性炸弹：当框架僵化时允许自我解体
+Full Spectrum Engine - awareness bomb engine.
+
+L5 "awareness bomb" is a defensive soft-reset mechanism. It does not model a
+production protocol network. In the local engine it simply:
+
+- detects repeated purity / rigidity failures
+- softens the state back into a feasible band
+- records why the reset path was triggered
 """
 
+from dataclasses import dataclass
 from enum import Enum
-from dataclasses import dataclass, field
 from typing import Optional, Tuple
 import time
 
@@ -30,84 +36,73 @@ class AwarenessBombState:
 
 
 class AwarenessBombEngine:
-    """觉性炸弹引擎"""
-    
+    """Soft-reset controller for rigid or repeatedly failing states."""
+
     MAX_CONSECUTIVE_FAILURES = 3
     RECOVERY_DURATION = 10.0
     RIGIDITY_THRESHOLD = 0.85
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.state = AwarenessBombState()
         self._failure_counter = 0
-    
+
     def check_trigger(
         self,
         S: CivilizationState,
         purity: float,
-        rigidity: float
+        rigidity: float,
     ) -> Tuple[bool, str]:
         """
-        检查是否应触发觉性炸弹
-        
+        Check whether the awareness-bomb path should trigger.
+
         Returns:
-            (是否触发, 原因)
+            (triggered, reason)
         """
-        # 条件1：能所纯度持续不合格
         if purity < 0.7:
             self._failure_counter += 1
             if self._failure_counter >= self.MAX_CONSECUTIVE_FAILURES:
-                return True, f"能所纯度连续{self._failure_counter}次不合格"
+                return True, f"Purity below threshold for {self._failure_counter} consecutive checks"
         else:
             self._failure_counter = 0
-        
-        # 条件2：规则完全僵化
+
         if rigidity > self.RIGIDITY_THRESHOLD:
-            return True, f"规则刚性指数 {rigidity:.3f} > {self.RIGIDITY_THRESHOLD}"
-        
-        # 条件3：生存危机
-        #
-        # 如果同时处于“能所纯度不合格”路径，则由条件1的连续失败计数负责触发；
-        # 避免生存危机即时条件抢跑，破坏“三次连续失败触发”的测试契约。
+            return True, f"Rigidity index {rigidity:.3f} exceeded threshold {self.RIGIDITY_THRESHOLD:.2f}"
+
         if S.survival < 0.2 and purity >= 0.7:
-            return True, f"生存层 S_l={S.survival:.3f} < 0.2"
-        
-        return False, "未触发"
-    
+            return True, f"Survival layer dropped below emergency threshold: {S.survival:.3f}"
+
+        return False, "not triggered"
+
     def detonate(self, S: CivilizationState, reason: str = "") -> CivilizationState:
-        """引爆觉性炸弹"""
+        """Trigger a soft reset and project the state back to a safer band."""
         self.state.stage = BombStage.DETONATED
         self.state.detonation_time = time.time()
         self.state.trigger_count += 1
         self.state.trigger_reason = reason
-        
-        # 强投影到可行域
-        S_projected = project_to_feasible(S)
-        
-        # 额外软化：降低固化和刚性
-        S_softened = CivilizationState(
-            survival=S_projected.survival,
-            coordination=min(0.6, S_projected.coordination),
-            meaning=max(0.3, S_projected.meaning)
+
+        projected = project_to_feasible(S)
+        softened = CivilizationState(
+            survival=projected.survival,
+            coordination=min(0.6, projected.coordination),
+            meaning=max(0.3, projected.meaning),
         )
-        
-        return S_softened
-    
+        return softened
+
     def recover(self, S: CivilizationState, step: int) -> Tuple[CivilizationState, BombStage]:
-        """恢复期处理"""
+        """Advance recovery state after detonation."""
         if self.state.stage == BombStage.DETONATED:
             self.state.stage = BombStage.QUANTUM_SUPERPOSITION
             return S, self.state.stage
-        
-        elif self.state.stage == BombStage.QUANTUM_SUPERPOSITION:
+
+        if self.state.stage == BombStage.QUANTUM_SUPERPOSITION:
             self.state.recovery_progress = min(1.0, step / self.RECOVERY_DURATION)
             if self.state.recovery_progress >= 1.0:
                 self.state.stage = BombStage.NEW_EQUILIBRIUM
-                return S, self.state.stage
             return S, self.state.stage
-        
+
         return S, self.state.stage
-    
-    def reset(self):
-        """重置觉性炸弹状态"""
+
+    def reset(self) -> None:
+        """Reset controller state."""
         self.state = AwarenessBombState()
         self._failure_counter = 0

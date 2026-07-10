@@ -1,74 +1,70 @@
 #!/usr/bin/env python3
-"""
-全频谱协议 · 觉性炸弹单元测试
-验证硬约束是否能正确拦截违规状态
-"""
+"""Unit tests for the awareness bomb governance mechanism."""
 
-import sys
 import os
+import sys
+import unittest
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import unittest
 from src.core.state import CivilizationState, project_to_feasible
 from src.governance.bomb import AwarenessBombEngine, BombStage
 
 
 class TestBomb(unittest.TestCase):
-    
     def test_project_to_feasible(self):
-        """测试觉性炸弹投影"""
-        S = CivilizationState(0.1, 0.9, 0.1)
-        self.assertFalse(S.is_feasible())
-        
-        S_proj = project_to_feasible(S)
-        self.assertTrue(S_proj.is_feasible())
-        self.assertAlmostEqual(S_proj.survival, 0.3)
-        self.assertAlmostEqual(S_proj.coordination, 0.8)
-        self.assertAlmostEqual(S_proj.meaning, 0.2)
-    
+        """Project infeasible state back into feasible space."""
+        state = CivilizationState(0.1, 0.9, 0.1)
+        self.assertFalse(state.is_feasible())
+
+        projected = project_to_feasible(state)
+        self.assertTrue(projected.is_feasible())
+        self.assertAlmostEqual(projected.survival, 0.3)
+        self.assertAlmostEqual(projected.coordination, 0.8)
+        self.assertAlmostEqual(projected.meaning, 0.2)
+
     def test_bomb_trigger_consecutive_failures(self):
-        """测试觉性炸弹连续失败触发"""
+        """Trigger after consecutive infeasible checks."""
         engine = AwarenessBombEngine()
-        S = CivilizationState(0.1, 0.9, 0.1)  # 不可行状态
-        
-        # 连续3次触发
+        state = CivilizationState(0.1, 0.9, 0.1)
+
         for i in range(3):
-            triggered, reason = engine.check_trigger(S, purity=0.5, rigidity=0.5)
+            triggered, reason = engine.check_trigger(state, purity=0.5, rigidity=0.5)
             if i < 2:
                 self.assertFalse(triggered)
             else:
                 self.assertTrue(triggered)
-                self.assertIn("连续", reason)
-    
+                self.assertIn("consecutive", reason.lower())
+
     def test_bomb_trigger_rigidity(self):
-        """测试觉性炸弹刚性触发"""
+        """Trigger immediately on excessive rigidity."""
         engine = AwarenessBombEngine()
-        S = CivilizationState(0.5, 0.5, 0.5)
-        
-        triggered, reason = engine.check_trigger(S, purity=0.8, rigidity=0.9)
+        state = CivilizationState(0.5, 0.5, 0.5)
+
+        triggered, reason = engine.check_trigger(state, purity=0.8, rigidity=0.9)
         self.assertTrue(triggered)
-        self.assertIn("刚性", reason)
-    
+        self.assertIn("rigidity", reason.lower())
+
     def test_bomb_detonate(self):
-        """测试觉性炸弹引爆"""
+        """Detonation should project state and record trigger count."""
         engine = AwarenessBombEngine()
-        S = CivilizationState(0.1, 0.9, 0.1)
-        
-        S_detonated = engine.detonate(S, "测试引爆")
-        self.assertTrue(S_detonated.is_feasible())
+        state = CivilizationState(0.1, 0.9, 0.1)
+
+        detonated = engine.detonate(state, "test detonation")
+        self.assertTrue(detonated.is_feasible())
         self.assertEqual(engine.state.stage, BombStage.DETONATED)
         self.assertEqual(engine.state.trigger_count, 1)
-    
+
     def test_bomb_recover(self):
-        """测试觉性炸弹恢复"""
+        """Recovery should move stage from detonation to new equilibrium."""
         engine = AwarenessBombEngine()
-        S = CivilizationState(0.5, 0.5, 0.5)
-        
-        engine.detonate(S, "测试恢复")
-        S_recovered, stage = engine.recover(S, 0)
+        state = CivilizationState(0.5, 0.5, 0.5)
+
+        engine.detonate(state, "test recovery")
+        recovered, stage = engine.recover(state, 0)
         self.assertEqual(stage, BombStage.QUANTUM_SUPERPOSITION)
-        
-        S_recovered, stage = engine.recover(S, 10)
+
+        recovered, stage = engine.recover(state, 10)
         self.assertEqual(stage, BombStage.NEW_EQUILIBRIUM)
 
 
