@@ -1,6 +1,6 @@
 {
   "simulation_id": "CASE005_KNOWLEDGE_CONFLICT",
-  "input_query": "AI助手与企业知识库对同一问题给出矛盾答案，需要裁决以哪个为准",
+  "input_query": "AI 助手与企业知识源对同一问题给出冲突答案，需要裁定以哪个为准",
   "sensitivity_level": "medium",
   "enterprise_id": "knowledge-service",
   "rule_version": "v0.3",

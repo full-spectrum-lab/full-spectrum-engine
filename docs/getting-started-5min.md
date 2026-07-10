@@ -1,20 +1,28 @@
 # 5 分钟跑通 full-spectrum-engine
 
-> 目标：让第一次进入仓库的人，在不理解全频谱全部理论的情况下，也能本地跑通一次完整推演。
+> 目标：第一次进入仓库的人，在不了解完整理论背景的前提下，也能本地跑通一次完整推演。
 
 ---
 
 ## 1. 前提
 
 - Python 3.10+
-- 可访问 Gitee
-- 本地不需要数据库
+- 可访问 GitHub 或 Gitee
+- 本地不需要外部数据库
 - 本地不需要外部 API Key
-- 本地不需要接入全频谱协议网络
+- 本地不需要加入全频谱协议网络
 
 ---
 
 ## 2. 安装
+
+```bash
+git clone https://github.com/full-spectrum-lab/full-spectrum-engine.git
+cd full-spectrum-engine
+pip install -r requirements.txt
+```
+
+如使用 Gitee：
 
 ```bash
 git clone https://gitee.com/full-spectrum/full-spectrum-engine.git
@@ -24,34 +32,37 @@ pip install -r requirements.txt
 
 ---
 
-## 3. 运行第一个样例
+## 3. 跑第一个样例
 
 ```bash
 python simulate.py --config examples/scenario_refund_conflict.json
 ```
 
-你会看到一段 JSON 输出，里面包含：
+你会看到一段 JSON 输出，核心字段包括：
 
-- `fshi`：当前状态的全频谱健康指数；
-- `ess`：ESS 推演选择了哪条路径；
-- `validation`：梦蝶校验、觉性炸弹、紧急制动状态；
-- `risk_vector`：风险向量；
-- `runestone`：符石审计令牌；
-- `causal_chain`：因果链报告。
+- `fshi`：当前状态的全频谱健康指数
+- `ess`：ESS-lite 给出的建议路径
+- `validation`：边界校验、炸弹校验、紧急制动状态
+- `risk_vector`：压缩后的风险向量
+- `runestone`：审计令牌
+- `causal_chain`：因果链说明
 
 ---
 
-## 3.1 生成可复现输出
-
-如果你希望每次运行得到完全一致的输出，可以指定随机种子：
+## 4. 跑可复现输出
 
 ```bash
 python simulate.py --config examples/scenario_refund_conflict.json --seed 42
 ```
 
-`--seed` 会固定 ESS 推演随机路径、符石 ID、符石时间戳与因果链 ID。这样生成的结果可以作为 golden sample，用于 CI 或版本升级前后的回归比较。
+`--seed` 会固定：
 
-如需指定展示时间戳，可额外传入：
+- ESS-lite 路径选择
+- `Runestone` ID
+- 因果链 ID
+- 输出时间戳
+
+如需进一步固定展示时间：
 
 ```bash
 python simulate.py --config examples/scenario_refund_conflict.json --seed 42 --fixed-time 2026-07-04T00:00:00Z
@@ -59,10 +70,10 @@ python simulate.py --config examples/scenario_refund_conflict.json --seed 42 --f
 
 ---
 
-## 4. 把结果写入文件
+## 5. 将结果写入文件
 
 ```bash
-python simulate.py --config examples/scenario_refund_conflict.json --output output/refund-result.json
+python simulate.py --config examples/scenario_refund_conflict.json --seed 42 --output output/refund-result.json
 ```
 
 如果 `output/` 不存在，请先创建：
@@ -73,90 +84,93 @@ mkdir output
 
 ---
 
-## 5. 运行第二个样例
+## 6. 跑第二个样例
 
 ```bash
-python simulate.py --config examples/scenario_knowledge_conflict.json
+python simulate.py --config examples/scenario_knowledge_conflict.json --seed 42
 ```
 
-这个样例模拟的是“AI 助手与企业知识库对同一问题给出矛盾答案”的情况。
+这个样例模拟的是：
+
+> AI 助手与企业知识源对同一问题给出冲突判断，需要把冲突显影为可复核的治理输出。
 
 ---
 
-## 6. 运行单元测试
+## 7. 跑 public beta 验证脚本
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/validate-public-beta.ps1
+```
+
+这个脚本会顺序执行：
+
+1. deterministic tests
+2. golden sample regression
+3. 重新生成临时样本并与仓库内 golden sample 对比
+4. 完整 `pytest`
+
+---
+
+## 8. 跑测试
 
 ```bash
 python -m pytest tests -v
 ```
 
-如果你不想使用 pytest，也可以运行 Python 内置 unittest：
+如果你只想先验证可复现性：
 
 ```bash
-python -m unittest tests.test_bomb -v
 python -m unittest tests.test_simulate_determinism -v
+python -m unittest tests.test_golden_samples -v
 ```
 
 ---
 
-## 7. 运行实验脚本
+## 9. 启动本地 API
 
 ```bash
-python experiments/experiment_A_baseline.py
-python experiments/experiment_B_ess.py
-python experiments/experiment_C_l0_ess.py
+pip install -e ".[api]"
+python -m src.api.server
 ```
 
-完整实验 A-H 位于：
+启动后访问：
 
-```text
-experiments/
-```
+- Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- Health: [http://127.0.0.1:8000/api/v1/health](http://127.0.0.1:8000/api/v1/health)
 
 ---
 
-## 8. 你应该如何理解输出
-
-### FSHI
-
-FSHI 是三频健康指数，用于描述当前系统状态：
-
-- 低频：生存与基本安全；
-- 中频：信任、协作与关系；
-- 高频：意义、方向与长期演化。
-
-### ESS
-
-ESS 是推演器。它不替代企业、人类或组织做最终决定，而是把不同路径的后果显影出来。
-
-### RiskVector
-
-RiskVector 是风险压缩格式。它把复杂冲突压缩为几个可比较的维度，例如信任影响、意义影响、可逆性、可解释性等。
-
-### Runestone
-
-Runestone 是符石审计令牌，用于记录“这次判断从哪里来、依据什么、留下什么审计线索”。
-
----
-
-## 9. 当前阶段边界
+## 10. 如何理解当前阶段
 
 当前版本是：
 
 ```text
-v0.3 alpha / experimental engine
+v0.8.0-beta / local-first public beta
 ```
 
-它可以用于：
+它适合用于：
 
-- 本地实验；
-- 推演样例；
-- 协议验证；
-- 内部方法论演示；
-- 早期开发者理解全频谱引擎结构。
+- 本地实验
+- 样例推演
+- 协议输出验证
+- 内部方法论演示
+- 早期开源评审
 
-它暂不应被描述为：
+它暂时不应用于：
 
-- 成熟生产系统；
-- 已被企业大规模部署的系统；
-- 法律、监管或合规裁决工具；
-- 能直接替代人类决策的自动裁决系统。
+- 高后果生产自动裁决
+- 法律/监管替代判断
+- 跨组织在线治理
+- 无人工复核的企业自动执行
+
+---
+
+## 11. 下一步看什么
+
+建议按这个顺序继续：
+
+1. [docs/local-first-engine.md](local-first-engine.md)
+2. [docs/api-reference-v0.8.md](api-reference-v0.8.md)
+3. [docs/troubleshooting.md](troubleshooting.md)
+4. [examples/README.md](../examples/README.md)
+5. [test-records/README.md](../test-records/README.md)

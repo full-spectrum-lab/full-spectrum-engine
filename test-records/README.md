@@ -15,11 +15,11 @@ test-records/v0.8-public-beta/
 
 These records include:
 
-- compile checks;
-- unit-test outputs;
-- experiment outputs;
-- CLI sample outputs;
-- seeded golden samples.
+- compile checks
+- unit-test outputs
+- experiment outputs
+- CLI sample outputs
+- seeded golden samples
 
 The current public beta golden files are:
 
@@ -38,18 +38,18 @@ The project needs more than “it runs”.
 
 It also needs a visible trace of:
 
-- how it was run;
-- what it produced;
-- which version was checked;
-- what later versions changed.
+- how it was run
+- what it produced
+- which version was checked
+- what later versions changed
 
 These files help with:
 
-- AI handoff;
-- human review;
-- version rollback checks;
-- release-note preparation;
-- stable comparison between release lines.
+- AI handoff
+- human review
+- version rollback checks
+- release-note preparation
+- stable comparison between release lines
 
 ---
 
@@ -83,10 +83,10 @@ powershell -ExecutionPolicy Bypass -File scripts/validate-public-beta.ps1
 
 As the project matures, raw text outputs should gradually give way to:
 
-- CI artifacts;
-- structured snapshots;
-- stable golden samples;
-- schema validation;
-- release attachments.
+- CI artifacts
+- structured snapshots
+- stable golden samples
+- schema validation
+- release attachments
 
 For now, fuller trace retention remains useful because the project is still in a fast-moving handoff and auditability phase.

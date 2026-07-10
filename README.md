@@ -13,28 +13,28 @@ Full Spectrum Engine is the runnable engine layer in the Full Spectrum ecosystem
 
 This repository is for **local internal validation first**:
 
-- runnable on a local machine;
-- reproducible with fixed seeds;
-- auditable at sample level;
-- explainable through structured outputs;
-- usable without joining an external protocol network.
+- runnable on a local machine
+- reproducible with fixed seeds
+- auditable at sample level
+- explainable through structured outputs
+- usable without joining an external protocol network
 
 It does **not** upload enterprise data by default, does **not** execute final business actions on behalf of an enterprise, and does **not** claim production governance completeness.
 
 ## 中文一句话
 
-这是全频谱体系里“企业内部引擎层”的 public beta：先让单个主体在本地边界内看见风险、留下审计记录、完成可复现验证，再决定是否进入更重的细胞协议层或协议网络层。
+这是全频谱体系里的“企业内部引擎层” public beta：先让单个主体在本地边界内看见风险、留下审计记录、完成可复现验证，再决定是否进入更重的细胞协议层或协议网络层。
 
 ---
 
 ## Public beta at a glance
 
-v0.8.0-beta is the first version intended to be publicly inspected as a coherent package:
+`v0.8.0-beta` is the first version intended to be publicly inspected as a coherent package:
 
-- **Runnable**: a reviewer can clone and run it locally in minutes.
-- **Reproducible**: fixed seeds and golden samples make output comparison stable.
-- **Explainable**: results are exported as structured governance artifacts instead of opaque scores only.
-- **Bounded**: non-goals and release boundary are explicit.
+- **Runnable**: a reviewer can clone and run it locally in minutes
+- **Reproducible**: fixed seeds and golden samples make output comparison stable
+- **Explainable**: results are exported as structured governance artifacts instead of opaque scores only
+- **Bounded**: non-goals and release boundary are explicit
 
 ---
 
@@ -51,25 +51,25 @@ If you want the fastest possible overview before reading code, start here:
 
 ## What this engine does
 
-- models a three-dimensional governance state `S(t) = [Survival, Coordination, Meaning]`;
-- computes FSHI (Full Spectrum Health Index);
-- generates structured `RiskVector` and `Runestone` outputs;
-- records local `AuditTrace` results;
-- supports deterministic simulation with `--seed`;
-- provides industry-adapter experiments, including e-commerce customer service;
-- exposes a local REST API for development and testing;
-- stores local audit records in SQLite;
-- supports optional ESS-lite path simulation for non-binding treatment suggestions.
+- models a three-dimensional governance state `S(t) = [Survival, Coordination, Meaning]`
+- computes FSHI (Full Spectrum Health Index)
+- generates structured `RiskVector` and `Runestone` outputs
+- records local `AuditTrace` results
+- supports deterministic simulation with `--seed`
+- provides industry-adapter experiments, including e-commerce customer service
+- exposes a local REST API for development and testing
+- stores local audit records in SQLite
+- supports optional ESS-lite path simulation for non-binding treatment suggestions
 
 ## What this engine does not do
 
-- does not replace legal, compliance, or business review;
-- does not execute refunds, penalties, bans, or final rulings;
-- does not implement the full four-layer recursive architecture yet;
-- does not implement protocol-network interoperability yet;
-- does not implement the full Cell Manifest yet;
-- does not implement the full DreamBrain yet;
-- does not implement Frequency Economy settlement yet.
+- does not replace legal, compliance, or business review
+- does not execute refunds, penalties, bans, or final rulings
+- does not implement the full four-layer recursive architecture yet
+- does not implement protocol-network interoperability yet
+- does not implement the full Cell Manifest yet
+- does not implement the full DreamBrain yet
+- does not implement Frequency Economy settlement yet
 
 ---
 
@@ -84,9 +84,9 @@ If you want the fastest possible overview before reading code, start here:
 
 A practical adoption path is:
 
-1. run the **engine layer** locally inside one organization;
-2. add **cell protocol declarations** when identity, permission, and responsibility need to be formalized;
-3. add the **protocol network layer** only when multiple subjects need cross-node audit or coordination.
+1. run the **engine layer** locally inside one organization
+2. add **cell protocol declarations** when identity, permission, and responsibility need to be formalized
+3. add the **protocol network layer** only when multiple subjects need cross-node audit or coordination
 
 ---
 
@@ -125,12 +125,15 @@ Local API docs:
 1. [Public preview boundary](docs/public-preview-boundary.md)
 2. [5-minute quick start](docs/getting-started-5min.md)
 3. [Local-first engine note](docs/local-first-engine.md)
-4. [Examples overview](examples/README.md)
-5. [Test records and golden samples](test-records/README.md)
-6. [v0.8 public beta gap list](docs/v0.8-public-beta-gap-list.md)
-7. [v0.8 release notes](docs/release-v0.8.0-beta.md)
-8. [GitHub release body draft](docs/github-release-v0.8.0-beta.md)
-9. [v0.9 hardening checklist](docs/v0.9-hardening-checklist.md)
+4. [API quick reference](docs/api-reference-v0.8.md)
+5. [Troubleshooting](docs/troubleshooting.md)
+6. [Examples overview](examples/README.md)
+7. [Test records and golden samples](test-records/README.md)
+8. [v0.8 public beta gap list](docs/v0.8-public-beta-gap-list.md)
+9. [v0.8 release notes](docs/release-v0.8.0-beta.md)
+10. [GitHub release body draft](docs/github-release-v0.8.0-beta.md)
+11. [v0.9 hardening checklist](docs/v0.9-hardening-checklist.md)
+12. [v1.0 gate criteria](docs/v1.0-gate-criteria.md)
 
 ---
 
@@ -148,18 +151,18 @@ Not yet a production governance platform
 
 This repository is suitable today for:
 
-- AI governance research;
-- enterprise-side internal validation;
-- customer-service quality inspection experiments;
-- local audit trail prototyping;
-- protocol-compatible simulation tests.
+- AI governance research
+- enterprise-side internal validation
+- customer-service quality inspection experiments
+- local audit trail prototyping
+- protocol-compatible simulation tests
 
 This repository is not yet suitable for:
 
-- direct production business execution;
-- automatic legal or compliance rulings;
-- cross-organization live governance orchestration;
-- claims of mature network governance interoperability.
+- direct production business execution
+- automatic legal or compliance rulings
+- cross-organization live governance orchestration
+- claims of mature network governance interoperability
 
 ---
 

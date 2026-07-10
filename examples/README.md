@@ -6,9 +6,9 @@ All current examples are based on **synthetic or desensitized sample data**. The
 
 For the `v0.8.0-beta` public surface, every core example should satisfy three conditions:
 
-1. it can be run directly;
-2. it can be reproduced with `--seed`;
-3. it can be compared against a committed golden sample.
+1. it can be run directly
+2. it can be reproduced with `--seed`
+3. it can be compared against a committed golden sample
 
 ---
 
@@ -29,9 +29,9 @@ python simulate.py --config examples/scenario_refund_conflict.json --seed 42
 
 Use it to:
 
-- simulate a conflict between user expectation, merchant rule, and platform handling logic;
-- inspect the complete output chain: FSHI, ESS-lite, RiskVector, Runestone, and causal-chain report;
-- demonstrate a bounded first public governance case.
+- simulate a conflict between user expectation, merchant rule, and platform handling logic
+- inspect the complete output chain: FSHI, ESS-lite, RiskVector, Runestone, and causal-chain report
+- demonstrate a bounded first public governance case
 
 ---
 
@@ -52,9 +52,9 @@ python simulate.py --config examples/scenario_knowledge_conflict.json --seed 42
 
 Use it to:
 
-- simulate conflicting answers between an AI assistant and enterprise knowledge sources;
-- show how a knowledge-source mismatch becomes a visible governance risk;
-- anchor later adapter work for platform rule, merchant rule, product knowledge, and order-state conflicts.
+- simulate conflicting answers between an AI assistant and enterprise knowledge sources
+- show how a knowledge-source mismatch becomes a visible governance risk
+- anchor later adapter work for platform rule, merchant rule, product knowledge, and order-state conflicts
 
 ---
 
@@ -79,11 +79,11 @@ powershell -ExecutionPolicy Bypass -File scripts/validate-public-beta.ps1
 
 Public examples should:
 
-- avoid real enterprise data;
-- avoid real user private data;
-- avoid implying confirmed production deployment;
-- avoid presenting simulation output as a legal or compliance ruling;
-- preserve the boundary that final review belongs to humans and organizations, not to the engine alone.
+- avoid real enterprise data
+- avoid real user private data
+- avoid implying confirmed production deployment
+- avoid presenting simulation output as a legal or compliance ruling
+- preserve the boundary that final review belongs to humans and organizations, not to the engine alone
 
 ---
 

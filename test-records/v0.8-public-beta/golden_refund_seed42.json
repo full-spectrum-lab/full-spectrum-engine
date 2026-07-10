@@ -1,7 +1,7 @@
 {
   "simulation_id": "CASE001_REFUND_CONFLICT",
   "timestamp": "2026-07-04T00:00:00Z",
-  "input_query": "用户申请退款，但商家以'已拆封'为由拒绝，平台需要裁决是否强制退款",
+  "input_query": "用户申请退款，但商家以“已拆封”为由拒绝，平台需要裁定是否强制退款",
   "sensitivity_level": "high",
   "initial_state": {
     "survival": 0.72,
