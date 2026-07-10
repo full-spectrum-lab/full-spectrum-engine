@@ -1,60 +1,59 @@
 # Test Records
 
-本目录用于保存 full-spectrum-engine 的本地验证留痕。
+This directory stores reproducibility and verification traces for `full-spectrum-engine`.
 
-它不是正式测试框架的一部分，而是项目早期为了可追溯而保留的运行证据。
+It is not the main test framework itself. Instead, it preserves selected outputs that help humans and future automation compare behavior across versions.
 
 ---
 
-## 1. 当前记录
+## Current record sets
 
 ```text
 test-records/2026-07-04-v0.3-candidate/
 test-records/v0.8-public-beta/
 ```
 
-包含：
+These records include:
 
-- Python 编译检查；
-- 单元测试输出；
-- 实验 A-H 输出；
-- CLI 样例输出。
-- 固定随机种子的 golden sample。
+- compile checks;
+- unit-test outputs;
+- experiment outputs;
+- CLI sample outputs;
+- seeded golden samples.
 
-其中：
+The current public beta golden files are:
 
 ```text
 golden_refund_seed42.json
 golden_knowledge_seed42.json
 ```
 
-是通过 `--seed 42` 生成的可复现输出，用于检查后续版本是否破坏主输出结构。
-
-v0.8 public beta 额外要求：
-
-- 固定场景 + 固定 seed 产出必须稳定；
-- golden sample 必须可以被自动脚本校验；
-- 测试记录既能给人看，也能给 CI / 镜像同步看。
+They are generated with `--seed 42` and are used to verify that later versions do not silently break the main public output structure.
 
 ---
 
-## 2. 为什么保留这些文件
+## Why keep these files
 
-全频谱项目强调：
+The project needs more than “it runs”.
 
-> 不只说“能跑”，还要留下“怎么跑、跑出了什么、谁验证过”的痕迹。
+It also needs a visible trace of:
 
-因此早期版本会保留文本化测试输出，方便：
+- how it was run;
+- what it produced;
+- which version was checked;
+- what later versions changed.
 
-- AI 接力；
-- 人类复核；
-- 版本回溯；
-- 后续 release note 编写；
-- 对比不同版本的行为变化。
+These files help with:
+
+- AI handoff;
+- human review;
+- version rollback checks;
+- release-note preparation;
+- stable comparison between release lines.
 
 ---
 
-## 3. 如何重新生成
+## How to regenerate
 
 ```bash
 python -m compileall .
@@ -80,14 +79,14 @@ powershell -ExecutionPolicy Bypass -File scripts/validate-public-beta.ps1
 
 ---
 
-## 4. 后续建议
+## Future direction
 
-当项目进入更稳定阶段后，应逐步减少大体积静态输出文件，改为：
+As the project matures, raw text outputs should gradually give way to:
 
-- CI artifact；
-- 结构化 snapshot；
-- 固定随机种子的 golden sample；
-- schema 校验；
-- release 附件。
+- CI artifacts;
+- structured snapshots;
+- stable golden samples;
+- schema validation;
+- release attachments.
 
-当前保留完整输出，是为了早期协作和断联接力。
+For now, fuller trace retention remains useful because the project is still in a fast-moving handoff and auditability phase.
