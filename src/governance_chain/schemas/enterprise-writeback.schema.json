@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/enterprise-writeback.schema.json",
+  "title": "EnterpriseWriteback",
+  "description": "Enterprise-consumable decision object gating auto-reply, commitment and execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_status",
+    "allow_auto_reply",
+    "allow_commitment",
+    "allow_auto_execution",
+    "human_review_required",
+    "safety_action",
+    "risk_level",
+    "reason_code",
+    "recommended_response",
+    "audit_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["ew-0.1"],
+      "description": "Must be ew-0.1."
+    },
+    "case_status": { "type": "string" },
+    "allow_auto_reply": { "type": "boolean" },
+    "allow_commitment": { "type": "boolean" },
+    "allow_auto_execution": { "type": "boolean" },
+    "human_review_required": { "type": "boolean" },
+    "safety_action": { "type": "string" },
+    "risk_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "reason_code": { "type": "string" },
+    "recommended_response": { "type": "string" },
+    "audit_id": { "type": "string" },
+    "review_role": { "type": "string" },
+    "review_queue": { "type": "string" }
+  }
+}

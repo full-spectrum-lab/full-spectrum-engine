@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://full-spectrum-protocol/schemas/canonical-context.schema.json",
+  "title": "Canonical Context",
+  "description": "Normalized, governance-ready representation produced by a Business Adapter's to_canonical_context mapping. Aligned with FSP-IO-v0.5-rc1 §8.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "canonical_context_id",
+    "source_event_id",
+    "actor",
+    "action",
+    "authority",
+    "known_facts",
+    "unknowns",
+    "risk_axes",
+    "privacy",
+    "extension_fields"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "cc-0.1"
+    },
+    "canonical_context_id": {
+      "type": "string"
+    },
+    "source_event_id": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["human", "ai_agent", "system", "organization"]
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent"],
+      "properties": {
+        "intent": { "type": "string" },
+        "commitment_type": { "type": "string" },
+        "authority_verified": { "type": "boolean" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verified"],
+      "properties": {
+        "verified": { "type": "boolean" },
+        "reason_code": { "type": "string" },
+        "reason": { "type": "string" }
+      }
+    },
+    "known_facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          }
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["description", "severity", "required_for_commitment"],
+        "properties": {
+          "description": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "required_for_commitment": { "type": "boolean" }
+        }
+      }
+    },
+    "risk_axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z_]+$": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["public_shareable", "redaction_status"],
+      "properties": {
+        "public_shareable": { "type": "boolean" },
+        "redaction_status": {
+          "type": "string",
+          "enum": ["public_redacted", "synthetic", "internal"]
+        }
+      }
+    },
+    "extension_fields": {
+      "type": "object"
+    }
+  }
+}

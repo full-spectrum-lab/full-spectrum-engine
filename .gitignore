@@ -13,3 +13,6 @@ data/
 *.db
 *.db-wal
 *.db-shm
+
+# governance-chain CLI generated output
+out/

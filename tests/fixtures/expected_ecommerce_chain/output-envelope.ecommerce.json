@@ -1,0 +1,35 @@
+{
+  "schema_version": "goe-0.1",
+  "engine_result": {
+    "engine": "full-spectrum-engine",
+    "version": "v1.0.0",
+    "run_id": "run_ecom_001"
+  },
+  "risk_vector": {
+    "dimensions": ["survival", "coordination", "meaning"],
+    "values": [0.72, 0.41, 0.55]
+  },
+  "safety_action": "human_review_required",
+  "enterprise_writeback": {
+    "schema_version": "ew-0.1",
+    "case_status": "human_review_required",
+    "allow_auto_reply": false,
+    "allow_commitment": false,
+    "allow_auto_execution": false,
+    "human_review_required": true,
+    "safety_action": "human_review_required",
+    "risk_level": "high",
+    "reason_code": "REFUND_COMMITMENT_WITHOUT_AUTHORITY",
+    "recommended_response": "当前信息不足，需人工核实退款权限后再处理。",
+    "audit_id": "audit_ecom_001",
+    "review_role": "customer_service_supervisor",
+    "review_queue": "after_sales_review"
+  },
+  "privacy": {
+    "public_shareable": false
+  },
+  "conformance": {
+    "schema_valid": true
+  },
+  "audit_references": ["audit_ecom_001"]
+}

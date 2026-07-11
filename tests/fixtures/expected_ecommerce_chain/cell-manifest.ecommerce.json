@@ -1,0 +1,23 @@
+{
+  "cell_id": "cs_ai_001",
+  "cell_type": "ai_customer_service",
+  "domain": "ecommerce_after_sales",
+  "certification": {
+    "issuer_type": "enterprise",
+    "issuer_id": "enterprise_cert_node_001",
+    "trust_domain": "example.enterprise.internal",
+    "certification_scope": "enterprise_private"
+  },
+  "capability_scope": ["explain_public_policy", "collect_required_materials"],
+  "boundary_scope": ["no_refund_commitment_without_authority"],
+  "forbidden_claims": ["full_refund_without_authority"],
+  "unknown_policy": "declare_unknown_and_escalate",
+  "human_anchor": {
+    "anchor_type": "role",
+    "anchor_id": "customer_service_supervisor"
+  },
+  "lifecycle": {
+    "status": "active",
+    "exit_policy": "graceful_shutdown_with_audit_snapshot"
+  }
+}

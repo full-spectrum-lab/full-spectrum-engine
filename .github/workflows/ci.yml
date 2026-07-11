@@ -46,3 +46,15 @@ jobs:
       - name: Run adapter CLI smoke test
         run: |
           python examples/run_ecommerce_adapter.py --metrics examples/metrics_ecommerce_conflict.json --seed 42
+
+      - name: Generate governance chain (ecommerce example)
+        run: |
+          python -m src.governance_chain generate --input examples/governance_chain/raw-input.ecommerce.json --out out/governance_chain
+
+      - name: Validate governance chain artifacts
+        run: |
+          python -m src.governance_chain validate out/governance_chain
+
+      - name: Run governance chain unit tests
+        run: |
+          python -m pytest tests/test_governance_chain.py -v

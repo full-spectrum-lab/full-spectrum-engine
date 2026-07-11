@@ -1,0 +1,11 @@
+{
+  "adapter_id": "ecommerce",
+  "raw_input": {
+    "raw_input_id": "raw_ecom_001",
+    "business_line": "ecommerce_customer_service",
+    "user_message": "我要退款。",
+    "ai_response": "可以给您全额退款。",
+    "refund_authority": false,
+    "human_review_completed": false
+  }
+}

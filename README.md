@@ -114,6 +114,36 @@ pip install -e ".[api]"
 python -m src.api.server
 ```
 
+---
+
+## Governance Chain CLI (ten-minute runnable)
+
+The engine now ships a CLI that turns a raw business input into the **full
+Full Spectrum governance object chain** — the same chain previously documented
+only as a static example in
+[`full-spectrum-protocol/examples/cases/ecommerce_chain/`](https://github.com/full-spectrum-lab/full-spectrum-protocol/tree/main/examples/cases/ecommerce_chain).
+
+No extra install is needed (standard library only, no numpy / network):
+
+```bash
+# 1) generate the chain
+python -m src.governance_chain generate \
+    --input examples/governance_chain/raw-input.ecommerce.json \
+    --out out/governance_chain
+
+# 2) validate the generated artifacts against the vendored protocol schemas
+python -m src.governance_chain validate out/governance_chain
+```
+
+This produces `governance-event`, `canonical-context`, `cell-manifest`,
+`output-envelope`, `enterprise-writeback` (all schema-valid) and a `report.md`.
+The output is **byte-for-byte reproducible** against the committed example;
+`tests/test_governance_chain.py` asserts that.
+
+After `pip install -e .` the same command is also available as `fsengine-govchain`.
+
+Full walkthrough: [examples/governance_chain/README.md](examples/governance_chain/README.md).
+
 Local API docs:
 
 - [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)

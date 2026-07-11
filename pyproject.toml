@@ -45,3 +45,6 @@ Repository = "https://github.com/full-spectrum-lab/full-spectrum-engine"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]
+
+[project.scripts]
+fsengine-govchain = "src.governance_chain.cli:main"

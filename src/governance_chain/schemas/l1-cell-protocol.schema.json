@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/l1-cell-protocol.schema.json",
+  "title": "L1CellManifest",
+  "description": "Minimal Cell Manifest for a Certified Node in the L1 Cell Protocol (subject access, identity tiering and certification domain).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cell_id",
+    "cell_type",
+    "domain",
+    "certification",
+    "capability_scope",
+    "boundary_scope",
+    "unknown_policy",
+    "human_anchor",
+    "lifecycle"
+  ],
+  "properties": {
+    "cell_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique subject identifier."
+    },
+    "cell_type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "e.g. ai_customer_service, risk_control, human_review."
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Business domain."
+    },
+    "certification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["issuer_type", "issuer_id", "trust_domain", "certification_scope"],
+      "properties": {
+        "issuer_type": { "type": "string" },
+        "issuer_id": { "type": "string" },
+        "trust_domain": { "type": "string" },
+        "certification_scope": {
+          "type": "string",
+          "enum": ["fsp_ecosystem", "enterprise_private", "consortium", "sandbox", "compatible_external"]
+        }
+      }
+    },
+    "capability_scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What the subject can do."
+    },
+    "boundary_scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What the subject must not do."
+    },
+    "forbidden_claims": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicit prohibited claims."
+    },
+    "unknown_policy": {
+      "type": "string",
+      "description": "How unknowns are handled."
+    },
+    "human_anchor": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["anchor_type"],
+      "properties": {
+        "anchor_type": {
+          "type": "string",
+          "enum": ["role", "human", "department", "org"]
+        },
+        "anchor_id": { "type": "string" }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "exit_policy"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "suspended", "exited"]
+        },
+        "exit_policy": { "type": "string" }
+      }
+    }
+  }
+}

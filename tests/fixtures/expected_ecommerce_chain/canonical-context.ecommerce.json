@@ -1,0 +1,36 @@
+{
+  "schema_version": "cc-0.1",
+  "canonical_context_id": "cc_ecom_refund_001",
+  "source_event_id": "ge_ecom_refund_001",
+  "actor": {
+    "id": "cs_ai_001",
+    "type": "ai_agent"
+  },
+  "action": {
+    "intent": "refund_request",
+    "commitment_type": "refund_commitment",
+    "authority_verified": false
+  },
+  "authority": {
+    "verified": false,
+    "reason_code": "REFUND_COMMITMENT_WITHOUT_AUTHORITY",
+    "reason": "AI customer-service agent lacks refund commitment authority."
+  },
+  "known_facts": [
+    {"description": "User requested a refund."},
+    {"description": "AI made a full-refund commitment without authority."}
+  ],
+  "unknowns": [
+    {"description": "Human review has not been completed.", "severity": "high", "required_for_commitment": true}
+  ],
+  "risk_axes": {
+    "commitment_risk": 0.9,
+    "authority_risk": 0.9,
+    "knowledge_conflict_risk": 0.1
+  },
+  "privacy": {
+    "public_shareable": true,
+    "redaction_status": "synthetic"
+  },
+  "extension_fields": {}
+}

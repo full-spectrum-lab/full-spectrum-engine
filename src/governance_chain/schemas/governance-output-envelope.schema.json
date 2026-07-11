@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/governance-output-envelope.schema.json",
+  "title": "GovernanceOutputEnvelope",
+  "description": "Standard engine output object bundling result, risk vector, safety action, enterprise writeback, privacy, and conformance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "engine_result",
+    "risk_vector",
+    "safety_action",
+    "enterprise_writeback",
+    "privacy",
+    "conformance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["goe-0.1"],
+      "description": "Must be goe-0.1."
+    },
+    "engine_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "version", "run_id"],
+      "properties": {
+        "engine": { "type": "string" },
+        "version": { "type": "string" },
+        "run_id": { "type": "string" }
+      }
+    },
+    "risk_vector": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["dimensions", "values"],
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "values": {
+          "type": "array",
+          "items": { "type": "number" }
+        }
+      }
+    },
+    "safety_action": {
+      "type": "string",
+      "description": "e.g. human_review_required."
+    },
+    "enterprise_writeback": {
+      "type": "object",
+      "description": "Embedded Enterprise Writeback object (see enterprise-writeback.schema.json)."
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "public_shareable": { "type": "boolean" }
+      }
+    },
+    "conformance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_valid": { "type": "boolean" }
+      }
+    },
+    "audit_references": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Links to AuditTrace / report."
+    }
+  }
+}
