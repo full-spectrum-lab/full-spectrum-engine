@@ -172,5 +172,6 @@ v0.8.0-beta / local-first public beta
 1. [docs/local-first-engine.md](local-first-engine.md)
 2. [docs/api-reference-v0.8.md](api-reference-v0.8.md)
 3. [docs/troubleshooting.md](troubleshooting.md)
+4. [docs/api-reference-v0.9.md](api-reference-v0.9.md)
 4. [examples/README.md](../examples/README.md)
 5. [test-records/README.md](../test-records/README.md)

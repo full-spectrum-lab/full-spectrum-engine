@@ -1,0 +1,783 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Full Spectrum Engine API",
+    "description": "Local REST API — turns the Full Spectrum Engine from a CLI script into an HTTP service callable by business systems.\n\nWARNING: NOT FOR PRODUCTION — local development interface, no authentication, no production-grade deployment.\nStorage mode: sqlite-persistent (v0.6 SQLite persistence)",
+    "version": "0.9.0a1"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "Health",
+        "description": "Health check endpoint.\n\nv0.6: Enhanced — original fields retained + new storage metadata.",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/evaluate": {
+      "post": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "Evaluate",
+        "description": "Simulation evaluation endpoint.\n\nSupports two modes:\n1. Direct mode: pass a complete scenario dict\n2. Adapter mode: pass industry + metrics\n\nResponse body is strictly equal to run_simulation() output, fully CLI-compatible.\ndecision_id is returned via the X-Decision-Id header (P0-1, P1-1).",
+        "operationId": "evaluate_api_v1_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runestone": {
+      "post": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "Create Runestone",
+        "description": "Standalone runestone generation endpoint.\n\nBypasses the full simulation pipeline and directly creates a runestone audit token.\nResponse body equals Runestone.to_dict() output.",
+        "operationId": "create_runestone_api_v1_runestone_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunestoneRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/decisions/{decision_id}": {
+      "get": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "Get Decision",
+        "description": "Decision record lookup endpoint.\n\nv0.6: Reads from SQLite (replaces v0.5 in-memory dict). Survives service restart.",
+        "operationId": "get_decision_api_v1_decisions__decision_id__get",
+        "parameters": [
+          {
+            "name": "decision_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Decision Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit/decisions": {
+      "get": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "List Decisions",
+        "description": "v0.6: Paginated decision list query.\n\nQuery parameters:\n    limit: page size (1-100, default 20)\n    offset: offset (default 0)\n    adapter: filter by adapter (optional)\n    since: UTC ISO 8601 start time (optional)",
+        "operationId": "list_decisions_api_v1_audit_decisions_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "adapter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Adapter"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "Delete Data",
+        "description": "v0.6: Data cleanup endpoint (with safety valve).\n\nSafety valve rules:\n1. Must pass confirm=true, otherwise 422\n2. Must pass before=<UTC ISO> or all=true, otherwise 422\n3. Returns 403 when bind_host is not 127.0.0.1/localhost",
+        "operationId": "delete_data_api_v1_audit_decisions_delete",
+        "parameters": [
+          {
+            "name": "confirm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Confirm"
+            }
+          },
+          {
+            "name": "before",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Before"
+            }
+          },
+          {
+            "name": "all",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "All"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit/runestones": {
+      "get": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "List Runestones",
+        "description": "v0.6: Runestone list query.\n\nQuery parameters:\n    limit: page size (1-100, default 20)\n    offset: offset (default 0)\n    since: UTC ISO 8601 start time (optional)",
+        "operationId": "list_runestones_api_v1_audit_runestones_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit/runestones/{runestone_id}": {
+      "get": {
+        "tags": [
+          "v0.9.0-alpha"
+        ],
+        "summary": "Get Runestone",
+        "description": "v0.6: Look up a runestone by runestone_id.\n\nCan query runestones auto-generated by evaluate and standalone POST /runestone runestones.",
+        "operationId": "get_runestone_api_v1_audit_runestones__runestone_id__get",
+        "parameters": [
+          {
+            "name": "runestone_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Runestone Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EvaluateRequest": {
+        "properties": {
+          "scenario": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario",
+            "description": "Direct mode: complete scenario config, matches simulate.py --config JSON format"
+          },
+          "industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Industry",
+            "description": "Adapter mode: industry identifier, e.g. 'ecommerce_customer_service'"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics",
+            "description": "Adapter mode: business metrics dict, keys are metric names, values are [0,1] normalized"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "description": "Random seed for deterministic simulation. Default 42",
+            "default": 42
+          },
+          "include_input_metrics": {
+            "type": "boolean",
+            "title": "Include Input Metrics",
+            "description": "Whether to include raw business metrics in response (privacy minimization: default false)",
+            "default": false
+          },
+          "simulation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Id",
+            "description": "Adapter mode: simulation ID (direct mode reads from scenario)"
+          },
+          "input_query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Query",
+            "description": "Adapter mode: scenario description"
+          },
+          "sensitivity_level": {
+            "type": "string",
+            "title": "Sensitivity Level",
+            "description": "Adapter mode: sensitivity level (low/medium/high)",
+            "default": "medium"
+          },
+          "enterprise_id": {
+            "type": "string",
+            "title": "Enterprise Id",
+            "description": "Adapter mode: enterprise ID",
+            "default": "default"
+          },
+          "rule_version": {
+            "type": "string",
+            "title": "Rule Version",
+            "description": "Adapter mode: rule version",
+            "default": "v0.3"
+          }
+        },
+        "type": "object",
+        "title": "EvaluateRequest",
+        "description": "POST /api/v1/evaluate request body\n\nSupports two modes:\n1. Direct mode: pass a complete scenario dict, equivalent to simulate.py --config\n2. Adapter mode: pass industry + metrics, MetricAdapter builds the scenario automatically\n\nExactly one mode must be used."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Service status: 'ok'"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "API version number"
+          },
+          "engine_version": {
+            "type": "string",
+            "title": "Engine Version",
+            "description": "Engine version number"
+          },
+          "registered_adapters": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Registered Adapters",
+            "description": "List of registered adapter industry identifiers"
+          },
+          "storage_mode": {
+            "type": "string",
+            "title": "Storage Mode",
+            "description": "Storage mode: 'sqlite-persistent' (v0.6 SQLite persistence)",
+            "default": "sqlite-persistent"
+          },
+          "network_exposure": {
+            "type": "string",
+            "title": "Network Exposure",
+            "description": "Network exposure level: 'local' (127.0.0.1) or 'non-local' (0.0.0.0)",
+            "default": "local"
+          },
+          "db_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Db Path",
+            "description": "SQLite database absolute path"
+          },
+          "db_size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Db Size Bytes",
+            "description": "Database file size (bytes)"
+          },
+          "decision_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Count",
+            "description": "Total decision records"
+          },
+          "runestone_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Runestone Count",
+            "description": "Total runestone records"
+          },
+          "ttl_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ttl Days",
+            "description": "TTL days (0=no auto-cleanup)"
+          },
+          "max_records": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Records",
+            "description": "Maximum decision records"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "engine_version",
+          "registered_adapters"
+        ],
+        "title": "HealthResponse",
+        "description": "GET /api/v1/health response body\n\nhealth is the only endpoint with a custom response structure.\nAll other endpoints return a body strictly compatible with CLI output.\n\nv0.6: storage_mode default updated to sqlite-persistent.\nv0.6: Added db_path/db_size_bytes/decision_count/runestone_count/ttl_days/max_records (optional fields)."
+      },
+      "RunestoneRequest": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "title": "Decision",
+            "description": "Decision option, e.g. 'W3'"
+          },
+          "reason": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Reason",
+            "description": "Audit reason, must contain enterprise_id and rule_version"
+          },
+          "risk_vector": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Risk Vector",
+            "description": "Eight-dimensional risk vector, must contain survival_impact/trust_impact/meaning_impact/reversibility/explainability/diffusivity/urgency/uncertainty"
+          },
+          "parent_runestone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Runestone",
+            "description": "Parent runestone ID (for chain auditing)"
+          },
+          "agent_trail": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Agent Trail",
+            "description": "Participating agent list"
+          },
+          "ess_snapshot": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Ess Snapshot",
+            "description": "ESS snapshot data"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "description": "Random seed (affects runestone_id generation)",
+            "default": 42
+          }
+        },
+        "type": "object",
+        "required": [
+          "decision",
+          "reason",
+          "risk_vector"
+        ],
+        "title": "RunestoneRequest",
+        "description": "POST /api/v1/runestone request body\n\nGenerate a standalone runestone audit token without the full simulation pipeline."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

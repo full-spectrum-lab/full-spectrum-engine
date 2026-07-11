@@ -1,6 +1,6 @@
 # Troubleshooting
 
-This page covers the most common first-run problems for `full-spectrum-engine v0.8.0-beta`.
+This page covers the most common first-run problems for `full-spectrum-engine v0.9.0a1`.
 
 ---
 
@@ -153,7 +153,7 @@ Use one request mode at a time:
 - direct mode: provide `scenario`
 - adapter mode: provide `industry` and `metrics`
 
-See [API quick reference](api-reference-v0.8.md).
+See [API quick reference](api-reference-v0.9.md) and [API fields and error codes](api-fields-and-errors-v0.9.md).
 
 ---
 
@@ -232,9 +232,42 @@ This is expected behavior, not a bug.
 
 ### Current status
 
-For `v0.8.0-beta`, one FastAPI / Starlette related warning is currently accepted and is not treated as a beta blocker.
+For `v0.9.0a1`, one FastAPI / Starlette related warning is currently accepted and is not treated as a hardening blocker.
 
-If the warning count grows, that becomes a v0.9 hardening issue.
+If the warning count grows, that becomes a release-governance issue. See [warning-governance-v0.9.md](warning-governance-v0.9.md).
+
+---
+
+## 12. Structured error code appears but the meaning is unclear
+
+### Symptom
+
+You receive a structured error such as:
+
+```json
+{
+  "detail": {
+    "message": "Unregistered adapter: 'foo'",
+    "error_code": "ADAPTER_NOT_FOUND"
+  }
+}
+```
+
+### Fix
+
+Use the stable `error_code` for logic and the `message` for diagnosis.
+
+Reference:
+
+- `VALIDATION_ERROR`
+- `ADAPTER_NOT_FOUND`
+- `SIMULATION_ERROR`
+- `INTERNAL_ERROR`
+- `STORAGE_ERROR`
+- `NOT_FOUND`
+- `FORBIDDEN`
+
+See [API fields and error codes](api-fields-and-errors-v0.9.md).
 
 ---
 
