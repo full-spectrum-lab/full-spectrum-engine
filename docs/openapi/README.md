@@ -4,7 +4,7 @@ This directory stores the machine-readable API contract for `full-spectrum-engin
 
 Current contract files:
 
-- `full-spectrum-engine-openapi-0.9.0a1.json`
+- `full-spectrum-engine-openapi-1.0.0.json`
 - `latest.json`
 
 These files are exported from the actual FastAPI app, not hand-written.
@@ -14,7 +14,7 @@ These files are exported from the actual FastAPI app, not hand-written.
 The repository now has three parallel API entry surfaces:
 
 1. runtime Swagger UI at `/docs`
-2. human-readable docs such as `docs/api-reference-v0.9.md`
+2. human-readable docs such as `docs/api-reference-v1.0.md`
 3. machine-readable OpenAPI export in this folder
 
 This third surface allows:

@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2%20%2F%20Apache%202.0-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-green)](https://www.python.org/)
-[![Status](https://img.shields.io/badge/Status-v0.9.0a1-hardening-blue)](#)
+[![Status](https://img.shields.io/badge/Status-v1.0.0-stable_local--first-success)](#)
 [![Tests](https://img.shields.io/badge/Tests-141%20passed-brightgreen)](#)
 
 Full Spectrum Engine is the runnable engine layer in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, local audit records, and optional ESS-lite path suggestions.
@@ -23,13 +23,13 @@ It does **not** upload enterprise data by default, does **not** execute final bu
 
 ## 中文一句话
 
-这是全频谱体系里的“企业内部引擎层” public beta：先让单个主体在本地边界内看见风险、留下审计记录、完成可复现验证，再决定是否进入更重的细胞协议层或协议网络层。
+这是全频谱体系里的“企业内部引擎层” v1.0：先让单个主体在本地边界内看见风险、留下审计记录、完成可复现验证，再决定是否进入更重的细胞协议层或协议网络层。
 
 ---
 
-## Public beta at a glance
+## v1.0 at a glance
 
-`v0.9.0a1` is the current hardening line after the first public beta release:
+`v1.0.0` is the first stable local-first contract release:
 
 - **Runnable**: a reviewer can clone and run it locally in minutes
 - **Reproducible**: fixed seeds and golden samples make output comparison stable
@@ -103,7 +103,7 @@ python simulate.py --config examples/scenario_refund_conflict.json
 # Reproducible output
 python simulate.py --config examples/scenario_refund_conflict.json --seed 42
 
-# Validate public beta surface
+# Validate public release surface
 powershell -ExecutionPolicy Bypass -File scripts/validate-public-beta.ps1
 
 # Run full test suite
@@ -122,24 +122,24 @@ Local API docs:
 
 ## Recommended reading order
 
-1. [Public preview boundary](docs/public-preview-boundary.md)
+1. [API quick contract](docs/api-quick-contract-v1.0.md)
 2. [5-minute quick start](docs/getting-started-5min.md)
 3. [Local-first engine note](docs/local-first-engine.md)
-4. [API quick reference](docs/api-reference-v0.9.md)
-5. [OpenAPI export](docs/openapi/README.md)
-6. [API fields and error codes](docs/api-fields-and-errors-v0.9.md)
-7. [Explainability walkthrough](docs/explainability-walkthrough-v0.9.md)
-8. [Warning governance](docs/warning-governance-v0.9.md)
-9. [Troubleshooting](docs/troubleshooting.md)
-10. [Examples overview](examples/README.md)
-11. [Test records and golden samples](test-records/README.md)
-12. [API sample pack](examples/api-samples/README.md)
-13. [v0.8 public beta gap list](docs/v0.8-public-beta-gap-list.md)
-14. [v0.8 release notes](docs/release-v0.8.0-beta.md)
-15. [GitHub release body draft](docs/github-release-v0.8.0-beta.md)
-16. [v0.9 hardening checklist](docs/v0.9-hardening-checklist.md)
-17. [v1.0 gate criteria](docs/v1.0-gate-criteria.md)
-18. [v1.0 gate review (`v0.9.0a1`)](docs/v1.0-gate-review-v0.9.0a1.md)
+4. [REST examples (curl / PowerShell / Python)](docs/rest-examples-v1.0.md)
+5. [API quick reference](docs/api-reference-v1.0.md)
+6. [OpenAPI export](docs/openapi/README.md)
+7. [API fields and error codes](docs/api-fields-and-errors-v1.0.md)
+8. [Explainability walkthrough](docs/explainability-walkthrough-v1.0.md)
+9. [Warning governance](docs/warning-governance-v1.0.md)
+10. [Troubleshooting](docs/troubleshooting.md)
+11. [Examples overview](examples/README.md)
+12. [Test records and golden samples](test-records/README.md)
+13. [API sample pack](examples/api-samples/README.md)
+14. [v1.0 gate criteria](docs/v1.0-gate-criteria.md)
+15. [v1.0 gate review](docs/v1.0-gate-review-v1.0.0.md)
+16. [v1.0 release checklist](docs/v1.0-release-checklist.md)
+17. [v1.0 release notes](docs/release-v1.0.0.md)
+18. [GitHub release body draft](docs/github-release-v1.0.0.md)
 
 ---
 
@@ -152,7 +152,8 @@ Runnable locally
 Reproducible with fixed seeds
 Auditable at sample level
 Useful for synthetic scenario validation
-Not yet a production governance platform
+Stable as a local-first governance engine contract
+Not a production governance platform
 ```
 
 This repository is suitable today for:
@@ -180,7 +181,7 @@ Current local baseline:
 141 passed, 1 warning
 ```
 
-The remaining warning comes from FastAPI / Starlette dependency behavior and is not currently treated as a blocker for this hardening line.
+The remaining warning comes from FastAPI / Starlette dependency behavior and is not currently treated as a blocker for the `v1.0.0` local-first contract release.
 
 ---
 

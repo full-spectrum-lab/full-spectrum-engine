@@ -10,6 +10,9 @@ This directory stores deterministic local API artifacts generated from:
 
 Files:
 
+- `evaluate-request-direct-refund.json`
+- `evaluate-request-adapter-ecommerce.json`
+- `runestone-request-refund.json`
 - `evaluate-response-refund-seed42.json`
 - `risk-vector-preview-refund-seed42.json`
 - `runestone-refund-seed42.json`

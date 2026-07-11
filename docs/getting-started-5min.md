@@ -96,7 +96,7 @@ python simulate.py --config examples/scenario_knowledge_conflict.json --seed 42
 
 ---
 
-## 7. 跑 public beta 验证脚本
+## 7. 跑公开版本验证脚本
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/validate-public-beta.ps1
@@ -145,7 +145,7 @@ python -m src.api.server
 当前版本是：
 
 ```text
-v0.8.0-beta / local-first public beta
+v1.0.0 / stable local-first engine contract
 ```
 
 它适合用于：
@@ -170,8 +170,9 @@ v0.8.0-beta / local-first public beta
 建议按这个顺序继续：
 
 1. [docs/local-first-engine.md](local-first-engine.md)
-2. [docs/api-reference-v0.8.md](api-reference-v0.8.md)
-3. [docs/troubleshooting.md](troubleshooting.md)
-4. [docs/api-reference-v0.9.md](api-reference-v0.9.md)
-4. [examples/README.md](../examples/README.md)
-5. [test-records/README.md](../test-records/README.md)
+2. [docs/api-quick-contract-v1.0.md](api-quick-contract-v1.0.md)
+3. [docs/rest-examples-v1.0.md](rest-examples-v1.0.md)
+4. [docs/api-reference-v1.0.md](api-reference-v1.0.md)
+5. [docs/troubleshooting.md](troubleshooting.md)
+6. [examples/README.md](../examples/README.md)
+7. [test-records/README.md](../test-records/README.md)

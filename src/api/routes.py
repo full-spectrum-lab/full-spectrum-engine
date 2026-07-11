@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — Route definitions (v0.9.0-alpha)
+Full Spectrum Engine API — Route definitions (v1.0.0)
 
 8 endpoints:
     GET    /api/v1/health                    — Health check (enhanced: storage metadata)
@@ -22,7 +22,7 @@ Engineering constraints:
     - v0.6: SQLite persistence layer, X-Storage-Mode=sqlite-persistent
     - v0.6: X-Input-Metrics-Persisted response header (NFR-16)
     - v0.6: DELETE safety valve (confirm + before/all + local-only binding)
-    - v0.9: All error responses use structured format {"message", "error_code"}
+    - v1.0: All error responses use structured format {"message", "error_code"}
 """
 
 import hashlib
@@ -48,11 +48,11 @@ if _PROJECT_ROOT not in sys.path:
 from simulate import run_simulation  # noqa: E402
 from src.bridge.runestone import Runestone, RiskVector, ReasonField  # noqa: E402
 
-router = APIRouter(prefix="/api/v1", tags=["v0.9.0-alpha"])
+router = APIRouter(prefix="/api/v1", tags=["v1.0.0"])
 
 # API version identifiers
-API_VERSION = "0.9.0a1"
-ENGINE_VERSION = "0.9.0-alpha"
+API_VERSION = "1.0.0"
+ENGINE_VERSION = "1.0.0"
 
 # Required risk vector fields (must match RiskVector.to_dict())
 # Note: the field name "reversibility" is retained for protocol compatibility,

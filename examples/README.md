@@ -4,7 +4,7 @@ This directory contains the smallest runnable examples for `full-spectrum-engine
 
 All current examples are based on **synthetic or desensitized sample data**. They do not represent any confirmed real customer deployment, real user dataset, or real enterprise production system.
 
-For the `v0.8.0-beta` public surface, every core example should satisfy three conditions:
+For the current public `v1.0.0` surface, every core example should satisfy three conditions:
 
 1. it can be run directly
 2. it can be reproduced with `--seed`
@@ -12,7 +12,7 @@ For the `v0.8.0-beta` public surface, every core example should satisfy three co
 
 ---
 
-## Example 1 — refund conflict
+## Example 1 - refund conflict
 
 File:
 
@@ -31,11 +31,11 @@ Use it to:
 
 - simulate a conflict between user expectation, merchant rule, and platform handling logic
 - inspect the complete output chain: FSHI, ESS-lite, RiskVector, Runestone, and causal-chain report
-- demonstrate a bounded first public governance case
+- demonstrate a bounded public governance case
 
 ---
 
-## Example 2 — knowledge conflict
+## Example 2 - knowledge conflict
 
 File:
 
@@ -58,13 +58,14 @@ Use it to:
 
 ---
 
-## Public beta golden samples
+## Current golden samples
 
-Current public beta preserves two fixed seeded outputs:
+The current release preserves fixed seeded outputs that can be replayed and compared:
 
 ```text
 test-records/v0.8-public-beta/golden_refund_seed42.json
 test-records/v0.8-public-beta/golden_knowledge_seed42.json
+test-records/v0.8-public-beta/golden_logistics_coldchain_seed42.json
 ```
 
 Recommended validation command:

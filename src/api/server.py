@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — Server factory and startup entry point (v0.9.0-alpha)
+Full Spectrum Engine API — Server factory and startup entry point (v1.0.0)
 
 Design principles:
     - create_app() factory function; seed initialized here (Qwen-B: no global state mutation in routes)
@@ -123,7 +123,7 @@ def create_app(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Full Spectrum Engine v0.9.0-alpha API Server",
+        description="Full Spectrum Engine v1.0.0 API Server",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -193,7 +193,7 @@ WARNING: NOT FOR PRODUCTION — local development interface, no authentication.
     # Startup log (v0.6 enhanced)
     print(
         f"\n"
-        f"Full Spectrum Engine v0.9.0-alpha API Server\n"
+        f"Full Spectrum Engine v1.0.0 API Server\n"
         f"Running at http://{args.host}:{args.port}\n"
         f"Docs: http://{args.host}:{args.port}/docs\n"
         f"Database: {os.path.abspath(args.db_path)}\n"

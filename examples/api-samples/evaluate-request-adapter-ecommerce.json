@@ -1,0 +1,14 @@
+{
+  "industry": "ecommerce_customer_service",
+  "metrics": {
+    "response_delay_score": 0.61,
+    "promise_conflict_rate": 0.72,
+    "customer_emotion_escalation": 0.81,
+    "policy_boundary_blur": 0.66,
+    "manual_handoff_failure": 0.55
+  },
+  "include_input_metrics": true,
+  "seed": 42,
+  "simulation_id": "SIM_ECOM_001",
+  "input_query": "Customer asks whether a coupon can still be applied after the order is locked."
+}

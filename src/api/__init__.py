@@ -1,5 +1,5 @@
 """
-Full Spectrum Engine — REST API Package (v0.9.0-alpha)
+Full Spectrum Engine — REST API Package (v1.0.0)
 
 Local-first API layer: provides HTTP invocation, industry adapter evaluation,
 SQLite audit persistence, and query capabilities on top of the core engine,
@@ -21,4 +21,4 @@ Constraints:
     - No authentication / SaaS / protocol network / final business execution
 """
 
-__version__ = "0.9.0a1"
+__version__ = "1.0.0"

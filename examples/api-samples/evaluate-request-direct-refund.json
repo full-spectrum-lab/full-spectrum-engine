@@ -1,0 +1,11 @@
+{
+  "scenario": {
+    "event": "refund_conflict",
+    "context": {
+      "user_emotion": "angry",
+      "merchant_commitment": "ambiguous"
+    },
+    "risk_level": "medium"
+  },
+  "seed": 42
+}

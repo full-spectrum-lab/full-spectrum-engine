@@ -1,0 +1,20 @@
+{
+  "risk_vector": {
+    "survival_impact": 0.42,
+    "trust_impact": 0.68,
+    "meaning_impact": 0.31,
+    "reversibility": 0.57,
+    "explainability": 0.76,
+    "diffusivity": 0.45,
+    "urgency": 0.59,
+    "uncertainty": 0.34
+  },
+  "decision": "W3",
+  "reason": {
+    "enterprise_id": "demo-enterprise",
+    "rule_version": "v1.0",
+    "trigger": "refund_conflict",
+    "recommendation": "pause automatic promise and escalate for review"
+  },
+  "seed": 42
+}
