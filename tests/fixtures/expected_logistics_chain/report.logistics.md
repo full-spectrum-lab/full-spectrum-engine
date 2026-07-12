@@ -5,6 +5,7 @@
 ## Summary
 
 - Raw input: `raw_logistics_001`
+- Observed subject: `none` (none)
 - Scenario: logistics_cold_chain
 - Detected issue: LOGISTICS_EVIDENCE_INCOMPLETE
 - Risk level: high

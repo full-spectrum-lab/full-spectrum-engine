@@ -77,6 +77,7 @@
       "additionalProperties": true,
       "description": "Versioned policy provenance and matched rule retained for replay."
     },
+    "subject_ref": { "type": "object", "additionalProperties": true },
     "relationships": {
       "$ref": "#/$defs/relationships"
     }

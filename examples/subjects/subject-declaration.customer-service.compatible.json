@@ -1,0 +1,26 @@
+{
+  "declaration_id": "sd-cs-ai-001",
+  "schema_version": "sd-1.1",
+  "mode": "compatible",
+  "source": "example.enterprise.internal",
+  "declared_by_ref": "role:customer-service-manager",
+  "declared_at": "2026-07-12T00:00:00Z",
+  "status": "active",
+  "schema_unknown_field_policy": "reject",
+  "subject": {
+    "local_subject_id": "cs_ai_01",
+    "subject_type": "ai_customer_service",
+    "enterprise_scope": "company_internal",
+    "capabilities": ["faq_answer", "order_status_query"],
+    "boundaries": ["no_refund_commitment", "no_policy_fabrication"],
+    "unknown_policy": {"action": "declare_and_escalate"},
+    "responsible_human": {"ref": "customer_service_manager"}
+  },
+  "l4_interop": {
+    "enabled": false,
+    "external_identity_refs": [],
+    "credential_refs": [],
+    "trust_domain_refs": [],
+    "verification_result_refs": []
+  }
+}

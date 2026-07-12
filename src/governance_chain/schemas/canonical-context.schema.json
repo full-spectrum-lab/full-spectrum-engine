@@ -119,6 +119,7 @@
     "extension_fields": {
       "type": "object"
     },
+    "subject_ref": { "type": "object", "additionalProperties": true },
     "relationships": {
       "$ref": "#/$defs/relationships"
     }

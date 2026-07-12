@@ -17,12 +17,26 @@ import sys
 
 from .generate import write_chain
 from . import validator
+from src.subject import load_declaration, normalize_declaration, SubjectDeclarationError
 
 
 def cmd_generate(args):
     with open(args.input, encoding="utf-8-sig") as f:
         raw_doc = json.load(f)
-    writes, artifacts = write_chain(args.out, raw_doc, timestamp=args.timestamp, policy_path=args.policy)
+    declaration = None
+    try:
+        if args.subject and args.subject_file:
+            print("error: use only one of --subject or --subject-file", file=sys.stderr)
+            return 2
+        if args.subject:
+            declaration, _ = normalize_declaration(json.loads(args.subject))
+        elif args.subject_file:
+            declaration, _ = load_declaration(args.subject_file)
+    except (json.JSONDecodeError, SubjectDeclarationError) as exc:
+        code = getattr(exc, "code", "SUBJECT_INVALID_JSON")
+        print(f"error: {code}: {exc}", file=sys.stderr)
+        return 2
+    writes, artifacts = write_chain(args.out, raw_doc, timestamp=args.timestamp, policy_path=args.policy, subject_declaration=declaration)
     print(f"Generated governance chain in {args.out}/:")
     for kind, path in writes.items():
         print(f"  - {os.path.relpath(path)}")
@@ -93,6 +107,8 @@ def build_parser():
                    help="Override event timestamp (default deterministic demo timestamp).")
     g.add_argument("--policy", default=None,
                    help="Versioned governance policy JSON; defaults to the vendored approved policy.")
+    g.add_argument("--subject", default=None, help="Inline Subject Declaration JSON (v1.1).")
+    g.add_argument("--subject-file", default=None, help="Subject Declaration JSON/YAML file (v1.1).")
     g.set_defaults(func=cmd_generate)
 
     v = sub.add_parser("validate", help="Validate generated JSON artifacts against vendored schemas.")

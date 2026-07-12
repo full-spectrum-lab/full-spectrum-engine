@@ -5,6 +5,7 @@
 ## Summary
 
 - Raw input: `raw_ecom_001`
+- Observed subject: `none` (none)
 - Scenario: ecommerce_customer_service
 - Detected issue: REFUND_COMMITMENT_WITHOUT_AUTHORITY
 - Risk level: high

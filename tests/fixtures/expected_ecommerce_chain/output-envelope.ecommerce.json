@@ -2,7 +2,7 @@
   "schema_version": "goe-0.1",
   "engine_result": {
     "engine": "full-spectrum-engine",
-    "version": "v1.0.0",
+    "version": "v1.1.0",
     "run_id": "run_ecom_001"
   },
   "risk_vector": {
@@ -43,7 +43,14 @@
         "target_type": "audit",
         "target_id": "audit_ecom_001"
       }
-    ]
+    ],
+    "subject_ref": {
+      "id": "none",
+      "mode": "none",
+      "declaration_id": "none",
+      "digest": "none",
+      "external_effect": false
+    }
   },
   "privacy": {
     "public_shareable": false
@@ -72,5 +79,12 @@
       "target_type": "cell_manifest",
       "target_id": "cs_ai_001"
     }
-  ]
+  ],
+  "subject_ref": {
+    "id": "none",
+    "mode": "none",
+    "declaration_id": "none",
+    "digest": "none",
+    "external_effect": false
+  }
 }

@@ -12,6 +12,7 @@ from .adapters import get_adapter, DEFAULT_TIMESTAMP, _split_raw_id
 from .engine import run
 from . import validator
 from .render import render
+from src.subject import normalize_declaration, subject_ref
 
 ARTIFACT_KINDS = (
     "governance-event",
@@ -22,7 +23,8 @@ ARTIFACT_KINDS = (
 )
 
 
-def build_chain(raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str = None) -> Tuple[Dict[str, Any], str, str]:
+def build_chain(raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str = None,
+                subject_declaration: Dict[str, Any] = None) -> Tuple[Dict[str, Any], str, str]:
     adapter = get_adapter(raw_doc.get("adapter_id"))
     ts = timestamp or DEFAULT_TIMESTAMP
 
@@ -52,6 +54,12 @@ def build_chain(raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str
         "output-envelope": envelope,
         "enterprise-writeback": ew,
     }
+    declaration = None
+    if subject_declaration is not None:
+        declaration, _ = normalize_declaration(subject_declaration)
+    ref = subject_ref(declaration)
+    for artifact in artifacts.values():
+        artifact["subject_ref"] = ref
 
     # validate every artifact and record the result in the output envelope
     all_ok = True
@@ -66,8 +74,9 @@ def build_chain(raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str
     return artifacts, run_id, audit_id
 
 
-def write_chain(out_dir: str, raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str = None) -> Tuple[Dict[str, str], Dict[str, Any]]:
-    artifacts, run_id, audit_id = build_chain(raw_doc, timestamp=timestamp, policy_path=policy_path)
+def write_chain(out_dir: str, raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str = None,
+                subject_declaration: Dict[str, Any] = None) -> Tuple[Dict[str, str], Dict[str, Any]]:
+    artifacts, run_id, audit_id = build_chain(raw_doc, timestamp=timestamp, policy_path=policy_path, subject_declaration=subject_declaration)
     os.makedirs(out_dir, exist_ok=True)
     suffix = raw_doc["adapter_id"]
     writes = {}

@@ -73,6 +73,10 @@ class EvaluateRequest(BaseModel):
         default="v0.3",
         description="Adapter mode: rule version"
     )
+    subject_declaration: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="v1.1 Subject Declaration; validated locally and retained as subject_ref only"
+    )
 
 
 class RunestoneRequest(BaseModel):

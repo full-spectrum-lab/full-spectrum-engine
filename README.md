@@ -100,6 +100,19 @@ A practical observer-first adoption path is:
 
 ## Quick start
 
+### v1.1 subject-aware governance chain
+
+```bash
+python -m src.governance_chain generate \
+  --input examples/governance_chain/raw-input.ecommerce.json \
+  --subject-file examples/subjects/subject-declaration.customer-service.compatible.json \
+  --out out/governance-chain
+```
+
+The declaration is validated locally, assigned a canonical SHA-256 digest and
+propagated as `subject_ref`. External identity and credential references are
+retained only; the Observer does not certify, authorize or execute an action.
+
 ```bash
 git clone https://github.com/full-spectrum-lab/full-spectrum-engine.git
 cd full-spectrum-engine

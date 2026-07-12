@@ -40,6 +40,7 @@
     "review_role": { "type": "string" },
     "review_queue": { "type": "string" }
     ,
+    "subject_ref": { "type": "object", "additionalProperties": true },
     "relationships": {
       "$ref": "#/$defs/relationships"
     }

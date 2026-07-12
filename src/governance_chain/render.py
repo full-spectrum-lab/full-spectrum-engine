@@ -21,6 +21,8 @@ def render(raw_doc, artifacts, run_id, audit_id):
     L.append("## Summary")
     L.append("")
     L.append(f"- Raw input: `{raw_id}`")
+    ref = artifacts["output-envelope"].get("subject_ref", {})
+    L.append(f"- Observed subject: `{ref.get('id', 'none')}` ({ref.get('mode', 'none')})")
     L.append(f"- Scenario: {ri.get('business_line', suffix)}")
     if not authority_ok:
         L.append(f"- Detected issue: {ew['reason_code']}")

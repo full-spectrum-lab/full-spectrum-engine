@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/subject-declaration.schema.json",
+  "title": "SubjectDeclaration v1.1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["declaration_id", "schema_version", "mode", "source", "declared_by_ref", "declared_at", "status", "schema_unknown_field_policy", "subject"],
+  "properties": {
+    "declaration_id": {"type": "string", "minLength": 1},
+    "schema_version": {"const": "sd-1.1"},
+    "mode": {"enum": ["tool", "compatible", "certified_reference"]},
+    "source": {"type": "string", "minLength": 1},
+    "declared_by_ref": {"type": "string", "minLength": 1},
+    "declared_at": {"type": "string", "format": "date-time"},
+    "effective_from": {"type": "string", "format": "date-time"},
+    "effective_until": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["draft", "active", "suspended", "expired", "revoked"]},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "schema_unknown_field_policy": {"enum": ["reject", "preserve", "warn"]},
+    "subject": {
+      "type": "object",
+      "required": ["local_subject_id", "subject_type"],
+      "properties": {
+        "local_subject_id": {"type": "string", "minLength": 1},
+        "subject_type": {"type": "string", "minLength": 1},
+        "enterprise_scope": {"type": "string"},
+        "capabilities": {"type": "array", "items": {"type": "string"}},
+        "boundaries": {"type": "array", "items": {"type": "string"}},
+        "unknown_policy": {"type": "object"},
+        "responsible_human": {"type": "object"}
+      }
+    },
+    "l4_interop": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean", "default": false},
+        "external_identity_refs": {"type": "array", "items": {"type": "string"}},
+        "credential_refs": {"type": "array", "items": {"type": "string"}},
+        "trust_domain_refs": {"type": "array", "items": {"type": "string"}},
+        "verification_result_refs": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"mode": {"enum": ["compatible", "certified_reference"]}}},
+      "then": {"properties": {"subject": {"required": ["enterprise_scope", "capabilities", "boundaries", "unknown_policy"]}}}
+    },
+    {
+      "if": {"properties": {"mode": {"const": "certified_reference"}}},
+      "then": {"required": ["l4_interop"], "properties": {"l4_interop": {"required": ["enabled"], "properties": {"enabled": {"const": true}}}}}
+    }
+  ]
+}

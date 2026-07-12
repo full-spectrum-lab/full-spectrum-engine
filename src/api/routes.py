@@ -47,12 +47,13 @@ if _PROJECT_ROOT not in sys.path:
 
 from simulate import run_simulation  # noqa: E402
 from src.bridge.runestone import Runestone, RiskVector, ReasonField  # noqa: E402
+from src.subject import normalize_declaration, subject_ref, SubjectDeclarationError  # noqa: E402
 
-router = APIRouter(prefix="/api/v1", tags=["v1.0.0"])
+router = APIRouter(prefix="/api/v1", tags=["v1.1.0"])
 
 # API version identifiers
-API_VERSION = "1.0.0"
-ENGINE_VERSION = "1.0.0"
+API_VERSION = "1.1.0"
+ENGINE_VERSION = "1.1.0"
 
 # Required risk vector fields (must match RiskVector.to_dict())
 # Note: the field name "reversibility" is retained for protocol compatibility,
@@ -73,7 +74,7 @@ RISK_VECTOR_FIELDS = [
 # Helper functions
 # ============================================================
 
-def _generate_decision_id(scenario: dict, seed: int) -> str:
+def _generate_decision_id(scenario: dict, seed: int, subject_ref_value=None) -> str:
     """
     Generate a deterministic decision_id from scenario content and seed (P0-1).
 
@@ -82,7 +83,7 @@ def _generate_decision_id(scenario: dict, seed: int) -> str:
     the same decision_id, ensuring reproducibility.
     """
     payload = json.dumps(
-        {"scenario": scenario, "seed": seed},
+        {"scenario": scenario, "seed": seed, "subject_ref": subject_ref_value},
         ensure_ascii=False,
         sort_keys=True,
     ).encode("utf-8")
@@ -286,6 +287,15 @@ async def evaluate(req: EvaluateRequest, request: Request, response: Response):
             },
         )
 
+    if req.subject_declaration is not None:
+        try:
+            declaration, warnings = normalize_declaration(req.subject_declaration)
+        except SubjectDeclarationError as exc:
+            raise HTTPException(status_code=422, detail={"message": str(exc), "error_code": exc.code})
+        result["subject_ref"] = subject_ref(declaration)
+        if warnings:
+            result["subject_declaration_warnings"] = warnings
+
     # v0.6 rc2 fix MH-BUG-v0.6-001: inject input_metrics into result when include_input_metrics=true
     # Ensures X-Input-Metrics-Persisted header / API response body / DB result_json are all consistent.
     # run_simulation() output does not include input_metrics (only in scenario._adapter),
@@ -296,7 +306,7 @@ async def evaluate(req: EvaluateRequest, request: Request, response: Response):
             result["input_metrics"] = adapter_meta["input_metrics"]
 
     # Generate decision_id (P0-1: strictly separated from runestone_id)
-    decision_id = _generate_decision_id(scenario, req.seed)
+    decision_id = _generate_decision_id(scenario, req.seed, result.get("subject_ref"))
 
     # v0.6: Persist to SQLite (replaces v0.5 in-memory cache)
     runestone_id = result.get("runestone", {}).get("runestone_id", "")

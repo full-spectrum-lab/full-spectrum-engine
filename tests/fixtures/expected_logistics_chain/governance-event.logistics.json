@@ -39,5 +39,12 @@
       "target_type": "raw_input",
       "target_id": "raw_logistics_001"
     }
-  ]
+  ],
+  "subject_ref": {
+    "id": "none",
+    "mode": "none",
+    "declaration_id": "none",
+    "digest": "none",
+    "external_effect": false
+  }
 }

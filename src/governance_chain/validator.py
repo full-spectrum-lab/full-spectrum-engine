@@ -27,6 +27,7 @@ SCHEMA_MAP = {
     "governance-output-envelope": "governance-output-envelope.schema.json",
     "enterprise-writeback": "enterprise-writeback.schema.json",
     "canonical-context": "canonical-context.schema.json",
+    "subject-declaration": "subject-declaration.schema.json",
 }
 
 

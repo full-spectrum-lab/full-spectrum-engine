@@ -5,6 +5,7 @@
 ## Summary
 
 - Raw input: `raw_knowledge_001`
+- Observed subject: `none` (none)
 - Scenario: enterprise_knowledge
 - Detected issue: KNOWLEDGE_SOURCE_CONFLICT
 - Risk level: high

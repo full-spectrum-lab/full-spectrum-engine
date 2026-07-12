@@ -89,6 +89,7 @@
         "exit_policy": { "type": "string" }
       }
     },
+    "subject_ref": { "type": "object", "additionalProperties": true },
     "relationships": {
       "$ref": "#/$defs/relationships"
     }
