@@ -57,6 +57,25 @@ class TestEnvelopeSchema(unittest.TestCase):
         out = env_mod.run_envelope(env)
         self.assertEqual(out["contract_version"], env_mod.CONTRACT_VERSION)
 
+    def test_input_envelope_requires_unknowns(self):  # P1-1 hardening
+        # gie-1.2 must reject an input envelope that omits the (now required)
+        # `unknowns` field. This locks in the P1-1 hardening: UNKNOWN may never
+        # be silent, so the schema forbids its absence.
+        env = _load_example()
+        env.pop("unknowns", None)
+        ok, errors = env_mod.validate_input_envelope(env)
+        self.assertFalse(ok, msg=f"input envelope missing `unknowns` must be rejected, got errors={errors}")
+        self.assertTrue(
+            any("unknowns" in str(e).lower() for e in errors),
+            msg=f"errors should reference `unknowns`: {errors}",
+        )
+
+        # An explicit (even empty) unknowns object must still be accepted.
+        env2 = _load_example()
+        env2["unknowns"] = {}
+        ok2, errors2 = env_mod.validate_input_envelope(env2)
+        self.assertTrue(ok2, msg=f"input envelope with empty `unknowns` must be valid: {errors2}")
+
 
 class TestCliRestEquivalence(unittest.TestCase):
     def test_run_envelope_deterministic(self):  # AC-01 (model-level parity)
