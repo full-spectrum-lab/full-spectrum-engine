@@ -14,7 +14,8 @@
     "subject_refs",
     "business_data",
     "gate",
-    "l4_mode"
+    "l4_mode",
+    "unknowns"
   ],
   "properties": {
     "schema_id": { "type": "string", "const": "gie-1.2" },
