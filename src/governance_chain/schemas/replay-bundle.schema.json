@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/replay-bundle.schema.json",
+  "title": "ReplayBundle",
+  "description": "v1.4 ReplayBundle: the frozen set of 9 version bindings plus the input reference required to deterministically replay an evaluation (FR-02 / FR-03). seed and clock are folded into 'environment'. NFR-02: any missing resolved dependency must be reported explicitly by ReplayBundle.recompute_or_raise (never guessed).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "bundle_id",
+    "bindings",
+    "input_ref",
+    "bundle_digest"
+  ],
+  "properties": {
+    "bundle_id": { "type": "string", "pattern": "^bundle_[0-9a-f]{16}$" },
+    "bindings": { "$ref": "#/$defs/version_bindings" },
+    "input_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "location"],
+      "properties": {
+        "digest": { "type": "string", "minLength": 1 },
+        "location": { "type": "string", "minLength": 1 }
+      }
+    },
+    "input_envelope": {
+      "type": ["object", "null"],
+      "description": "Inline input envelope (null when externalized; replay then requires input_ref.location to be resolvable)."
+    },
+    "bundle_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "source_event_id": {
+      "type": ["string", "null"],
+      "description": "Set when the bundle is derived from a stored EvaluationEvent (replay-by-event-id)."
+    }
+  },
+  "$defs": {
+    "version_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "schema",
+        "adapter",
+        "engine",
+        "profile",
+        "policy",
+        "knowledge",
+        "model",
+        "environment"
+      ],
+      "properties": {
+        "subject": { "type": "object" },
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["input", "output"],
+          "properties": {
+            "input": { "type": "string" },
+            "output": { "type": "string" }
+          }
+        },
+        "adapter": { "type": "object" },
+        "engine": { "type": "object" },
+        "profile": { "type": "object" },
+        "policy": { "type": "object" },
+        "knowledge": { "type": "object" },
+        "model": { "type": "object" },
+        "environment": { "type": "object" }
+      }
+    }
+  }
+}

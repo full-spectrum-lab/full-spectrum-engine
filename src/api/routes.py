@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — Route definitions (v1.0.0)
+Full Spectrum Engine API — Route definitions (v1.4.0)
 
-8 endpoints:
+14 endpoints (first 8 are pre-v1.4; last 6 are v1.4 additive, read-only/append-only,
+never modify prior behavior):
     GET    /api/v1/health                    — Health check (enhanced: storage metadata)
     POST   /api/v1/evaluate                  — Simulation evaluation (direct mode + adapter mode)
     POST   /api/v1/runestone                 — Standalone runestone generation
@@ -11,6 +12,16 @@ Full Spectrum Engine API — Route definitions (v1.0.0)
     GET    /api/v1/audit/runestones          — Runestone audit list query (v0.6)
     GET    /api/v1/audit/runestones/{id}     — Single runestone lookup (v0.6)
     DELETE /api/v1/audit/decisions           — Data cleanup with safety valve (v0.6)
+    POST   /api/v1/envelope                  — v1.2 Observer Input/Output Envelope (v1.2)
+    POST   /api/v1/profile/load              — v1.3 Profile ingest (v1.3)
+    GET    /api/v1/profile/{id}              — v1.3 Profile fetch (v1.3)
+    POST   /api/v1/policy/load                — v1.3 Policy validate (v1.3)
+    POST   /api/v1/evaluation/record         — v1.4 analyze + record immutable event (FR-01)
+    POST   /api/v1/replay                    — v1.4 replay → new REPLAY event (FR-05/FR-06)
+    GET    /api/v1/evaluation/events/{id}    — v1.4 fetch a single event (FR-09)
+    GET    /api/v1/evaluation/events         — v1.4 list events (FR-09)
+    POST   /api/v1/audit/export               — v1.4 export chain as canonical JSONL (FR-09)
+    POST   /api/v1/audit/verify               — v1.4 verify chain integrity / tamper (FR-09)
 
 Engineering constraints:
     - API body strictly compatible with CLI output (no envelope) (P1-1)
@@ -37,7 +48,18 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
-from .models import EvaluateRequest, RunestoneRequest, HealthResponse, EnvelopeRequest, ProfileLoadRequest, PolicyLoadRequest
+from .models import (
+    EvaluateRequest,
+    RunestoneRequest,
+    HealthResponse,
+    EnvelopeRequest,
+    ProfileLoadRequest,
+    PolicyLoadRequest,
+    EvaluationRecordRequest,
+    ReplayRequest,
+    AuditExportRequest,
+    AuditVerifyRequest,
+)
 from .registry import get_registry
 from src.governance_chain import envelope as envelope_mod
 
@@ -804,3 +826,215 @@ async def policy_load(req: PolicyLoadRequest, response: Response):
                 detail={"message": f"policy missing required field: {field}", "error_code": "POLICY_INVALID"},
             )
     return {"policy_id": policy.get("policy_id"), "version": policy.get("version")}
+
+
+# ============================================================
+# v1.4 additive endpoints — Replay & Audit (NOT FOR PRODUCTION / local only)
+# ============================================================
+#
+# These six endpoints are purely ADDITIVE. They reuse the exact same facade
+# functions the CLI uses (record_evaluation / ReplayEngine / AuditExporter /
+# IntegrityChecker), so REST and CLI are byte-for-byte equivalent (FR-03 /
+# AC-01). No pre-v1.4 endpoint or model is modified.
+
+
+def _get_eval_store():
+    """Return the v1.4 evaluation-event store (default append-only SQLite)."""
+    from src.governance_chain import replay_store as rs_mod
+
+    return rs_mod.get_default_store()
+
+
+@router.post("/evaluation/record")
+async def evaluation_record(req: EvaluationRecordRequest, response: Response):
+    """
+    v1.4 additive endpoint: analyze an Input Envelope and append an immutable
+    EvaluationEvent (FR-01 / FR-03).
+
+    The response body is the audited v1.2 Output Envelope with a *real,
+    resolvable* ``replay_ref`` (red-line: never forged). The v1.2/v1.3 direct
+    ``/envelope`` path is untouched and still emits ``replay_ref=None``.
+    """
+    _set_metadata_headers(response)
+    from src.governance_chain import evaluation_event as ee_mod
+    from src.governance_chain.evaluation_event import EventIntegrityError
+
+    store = _get_eval_store()
+    env = req.input_envelope
+    try:
+        out = ee_mod.record_evaluation(
+            env,
+            store=store,
+            clock=req.clock or None,
+            externalize_input=req.externalize_input,
+        )
+    except EventIntegrityError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": str(exc), "error_code": "EVENT_INTEGRITY"},
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": str(exc), "error_code": "ENVELOPE_INVALID"},
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"message": f"Record failed: {exc}", "error_code": "INTERNAL_ERROR"},
+        )
+    response.headers["X-Evaluation-Event-Id"] = out.get("replay_ref", {}).get("event_id", "")
+    return out
+
+
+@router.post("/replay")
+async def replay(req: ReplayRequest, response: Response):
+    """
+    v1.4 additive endpoint: replay a ReplayBundle (or a stored event by id) into
+    a brand-new REPLAY EvaluationEvent — the original is never mutated (FR-05 /
+    FR-06). ``policy_version`` overrides the policy binding (FR-05).
+
+    Replays only APPEND; an original event's hash never changes (red-line).
+    """
+    _set_metadata_headers(response)
+    from src.governance_chain import replay as replay_mod
+    from src.governance_chain import replay_bundle as rb_mod
+    from src.governance_chain.replay_bundle import ReplayDependencyError
+
+    if req.replay_mode not in ("EXACT", "SEMANTIC", "EXPLANATORY"):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "message": f"unknown replay_mode '{req.replay_mode}'",
+                "error_code": "VALIDATION_ERROR",
+            },
+        )
+
+    store = _get_eval_store()
+    engine = replay_mod.ReplayEngine(store)
+
+    if req.bundle is not None:
+        bundle = rb_mod.ReplayBundle.from_dict(req.bundle)
+    elif req.event_id is not None:
+        ev = store.get(req.event_id)
+        if ev is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "message": f"event '{req.event_id}' not found",
+                    "error_code": "NOT_FOUND",
+                },
+            )
+        bundle = rb_mod.ReplayBundle.from_event(ev)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "message": "must provide 'bundle' or 'event_id'",
+                "error_code": "VALIDATION_ERROR",
+            },
+        )
+
+    try:
+        new_event = engine.replay(
+            bundle,
+            policy_version=req.policy_version or None,
+            replay_mode=req.replay_mode,
+        )
+    except ReplayDependencyError as exc:
+        # NFR-02: explicit, never-guess dependency failure — NOT a silent success.
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": str(exc), "error_code": "REPLAY_DEPENDENCY"},
+        )
+    return new_event
+
+
+@router.get("/evaluation/events/{event_id}")
+async def get_evaluation_event(event_id: str, response: Response):
+    """
+    v1.4 additive endpoint: fetch a single EvaluationEvent by id.
+    """
+    _set_metadata_headers(response)
+    store = _get_eval_store()
+    ev = store.get(event_id)
+    if ev is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"message": f"event '{event_id}' not found", "error_code": "NOT_FOUND"},
+        )
+    return ev
+
+
+@router.get("/evaluation/events")
+async def list_evaluation_events(
+    response: Response,
+    limit: int = 100,
+    offset: int = 0,
+    event_type: Optional[str] = None,
+):
+    """
+    v1.4 additive endpoint: list recorded EvaluationEvents (append-only chain).
+    """
+    _set_metadata_headers(response)
+    if limit < 1 or limit > 1000:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": "limit must be between 1 and 1000", "error_code": "VALIDATION_ERROR"},
+        )
+    if offset < 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": "offset must be >= 0", "error_code": "VALIDATION_ERROR"},
+        )
+    store = _get_eval_store()
+    events = store.list_events(limit=limit, offset=offset, event_type=event_type)
+    return {
+        "items": events,
+        "total": store.count(),
+        "returned": len(events),
+        "limit": limit,
+        "offset": offset,
+    }
+
+
+@router.post("/audit/export")
+async def audit_export(req: AuditExportRequest, response: Response):
+    """
+    v1.4 additive endpoint: export the append-only chain as canonical JSONL
+    (FR-09). Returns the temp file path plus the exact JSONL content.
+    """
+    _set_metadata_headers(response)
+    import tempfile
+
+    from src.governance_chain import audit as audit_mod
+
+    store = _get_eval_store()
+    events = store.list_events(limit=req.limit)
+    fd, path = tempfile.mkstemp(prefix="fse_audit_", suffix=".jsonl")
+    import os
+
+    os.close(fd)
+    audit_mod.AuditExporter.export_range(events, path)
+    with open(path, encoding="utf-8") as handle:
+        content = handle.read()
+    return {"path": path, "count": len(events), "content": content}
+
+
+@router.post("/audit/verify")
+async def audit_verify(response: Response):
+    """
+    v1.4 additive endpoint: verify the append-only chain integrity, i.e. tamper
+    detection (FR-09). Returns {ok, tampered, count, chain_verified}.
+    """
+    _set_metadata_headers(response)
+    from src.governance_chain import audit as audit_mod
+
+    store = _get_eval_store()
+    ok, tampered = audit_mod.IntegrityChecker.verify_chain(store)
+    return {
+        "ok": ok,
+        "chain_verified": ok,
+        "tampered": tampered,
+        "count": store.count(),
+    }

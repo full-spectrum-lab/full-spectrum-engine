@@ -120,6 +120,80 @@ class PolicyLoadRequest(BaseModel):
     )
 
 
+# ============================================================
+# v1.4 Replay & Audit additive request models
+# ============================================================
+
+class EvaluationRecordRequest(BaseModel):
+    """
+    POST /api/v1/evaluation/record request body (v1.4, additive endpoint).
+
+    The body IS a v1.2 Input Envelope; the response is the audited goe-1.2 with a
+    real, resolvable ``replay_ref`` (FR-01 / FR-03).
+    """
+    input_envelope: Dict[str, Any] = Field(
+        ...,
+        description="v1.2 Input Envelope (gie-1.2) to analyze and record.",
+    )
+    externalize_input: bool = Field(
+        default=False,
+        description="NFR-03: when true, the input is not inlined; only input_ref is kept.",
+    )
+    clock: Optional[str] = Field(
+        default=None,
+        description="Pinned ISO-8601 clock for deterministic recorded_at.",
+    )
+
+
+class ReplayRequest(BaseModel):
+    """
+    POST /api/v1/replay request body (v1.4, additive endpoint).
+
+    Replay either a serialized ReplayBundle (``bundle``) or a stored event by id
+    (``event_id``). ``policy_version`` overrides the policy binding (FR-05);
+    ``replay_mode`` is EXACT/SEMANTIC/EXPLANATORY.
+    """
+    bundle: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="A serialized ReplayBundle dict.",
+    )
+    event_id: Optional[str] = Field(
+        default=None,
+        description="Stored EvaluationEvent id to replay (replay-by-event-id).",
+    )
+    policy_version: Optional[str] = Field(
+        default=None,
+        description="Override the policy version used for the replay (FR-05).",
+    )
+    replay_mode: str = Field(
+        default="EXACT",
+        description="Replay mode: EXACT | SEMANTIC | EXPLANATORY.",
+    )
+
+
+class AuditExportRequest(BaseModel):
+    """
+    POST /api/v1/audit/export request body (v1.4, additive endpoint).
+
+    Exports the full append-only chain as canonical JSONL. ``limit`` bounds the
+    number of events returned (default: all).
+    """
+    limit: int = Field(
+        default=1_000_000,
+        description="Maximum number of events to export (default: all).",
+    )
+
+
+class AuditVerifyRequest(BaseModel):
+    """
+    POST /api/v1/audit/verify request body (v1.4, additive endpoint).
+
+    Verifies the append-only chain integrity (tamper detection). No body fields
+    are required.
+    """
+
+
+
 class RunestoneRequest(BaseModel):
     """
     POST /api/v1/runestone request body

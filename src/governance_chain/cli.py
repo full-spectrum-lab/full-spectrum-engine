@@ -280,6 +280,146 @@ def cmd_policy_show(args):
     return 0
 
 
+# ----------------------------------------------------------------
+# v1.4 replay subcommand group (FR-01 / FR-05 / FR-06 / FR-07 / FR-09)
+# ----------------------------------------------------------------
+def _default_v14_store():
+    from src.governance_chain import replay_store as rs_mod
+
+    return rs_mod.get_default_store()
+
+
+def cmd_replay_record(args):
+    from src.governance_chain import evaluation_event as ee_mod
+    from src.governance_chain import replay_store as rs_mod
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    env = _load_json_file(args.input)
+    try:
+        out = ee_mod.record_evaluation(
+            env, store=store, clock=args.clock or None,
+            externalize_input=args.externalize,
+        )
+    except ee_mod.EventIntegrityError as exc:
+        print(f"error: EVENT_INTEGRITY: {exc}", file=sys.stderr)
+        return 2
+    print(f"recorded event_id={out['replay_ref']['event_id']}")
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as handle:
+            json.dump(out, handle, ensure_ascii=False, indent=2)
+        print(f"Audited Output Envelope written to {args.out}")
+    else:
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_replay_replay(args):
+    from src.governance_chain import replay as replay_mod
+    from src.governance_chain import replay_bundle as rb_mod
+    from src.governance_chain import replay_store as rs_mod
+    from src.governance_chain.replay_bundle import ReplayDependencyError
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    engine = replay_mod.ReplayEngine(store)
+    if args.bundle:
+        bundle = rb_mod.ReplayBundle.from_dict(_load_json_file(args.bundle))
+    elif args.event:
+        ev = store.get(args.event)
+        if ev is None:
+            print(f"error: event {args.event} not found", file=sys.stderr)
+            return 2
+        bundle = rb_mod.ReplayBundle.from_event(ev)
+    else:
+        print("error: provide --bundle or --event", file=sys.stderr)
+        return 2
+    try:
+        new_event = engine.replay(
+            bundle, policy_version=args.policy or None, replay_mode=args.mode
+        )
+    except ReplayDependencyError as exc:
+        print(f"error: REPLAY_DEPENDENCY: {exc}", file=sys.stderr)
+        return 2
+    print(
+        f"replayed new event_id={new_event['event_id']} "
+        f"type={new_event['event_type']} mode={new_event['replay_mode']}"
+    )
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as handle:
+            json.dump(new_event, handle, ensure_ascii=False, indent=2)
+        print(f"Replay event written to {args.out}")
+    else:
+        print(json.dumps(new_event, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_replay_audit_export(args):
+    from src.governance_chain import audit as audit_mod
+    from src.governance_chain import replay_store as rs_mod
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    events = store.list_events(limit=10 ** 9)
+    path = audit_mod.AuditExporter.export_range(events, args.out)
+    print(f"exported {len(events)} event(s) to {path}")
+    return 0
+
+
+def cmd_replay_audit_verify(args):
+    from src.governance_chain import audit as audit_mod
+    from src.governance_chain import replay_store as rs_mod
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    ok, tampered = audit_mod.IntegrityChecker.verify_chain(store)
+    if ok:
+        print("INTEGRITY OK: chain verified, no tamper points")
+        return 0
+    print(f"INTEGRITY FAIL: {len(tampered)} tamper point(s):", file=sys.stderr)
+    for t in tampered:
+        print(f"  - {t}", file=sys.stderr)
+    return 1
+
+
+def cmd_replay_audit_events(args):
+    from src.governance_chain import replay_store as rs_mod
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    events = store.list_events(limit=args.limit, offset=args.offset)
+    for e in events:
+        prev = (e.get("previous_event_hash") or "")[:12]
+        print(f"{e['event_id']} {e['event_type']} {e.get('replay_mode')} prev={prev}")
+    return 0
+
+
+def cmd_replay_retention_backup(args):
+    from src.governance_chain import replay_store as rs_mod
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    path = store.backup(args.path)
+    print(f"backup written to {path}")
+    return 0
+
+
+def cmd_replay_retention_restore(args):
+    from src.governance_chain import replay_store as rs_mod
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    try:
+        store.restore(args.path)
+    except FileNotFoundError:
+        print(f"error: backup not found: {args.path}", file=sys.stderr)
+        return 2
+    print(f"restored from {args.path}")
+    return 0
+
+
+def cmd_replay_retention_cleanup(args):
+    from src.governance_chain import replay_store as rs_mod
+
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else _default_v14_store()
+    n = store.cleanup(args.before)
+    print(f"cleanup removed {n} trailing OPERATION event(s)")
+    return 0
+
+
 def build_parser():
     p = argparse.ArgumentParser(
         prog="fsengine-govchain",
@@ -346,6 +486,59 @@ def build_parser():
     po_show = pos.add_parser("show", help="Show the default governance policy.")
     po_show.add_argument("--out", "-o", default=None, help="Write the policy JSON to this path instead of stdout.")
     po_show.set_defaults(func=cmd_policy_show)
+
+    # ---- v1.4 replay subcommand group (additive) ----
+    rp_grp = sub.add_parser(
+        "replay", help="v1.4 Replay & Audit (record/replay/audit/retention)."
+    )
+    rps = rp_grp.add_subparsers(dest="replay_cmd", required=True)
+
+    rp_rec = rps.add_parser("record", help="Analyze + record an immutable EvaluationEvent (FR-01).")
+    rp_rec.add_argument("--input", "-i", required=True, help="Input Envelope JSON.")
+    rp_rec.add_argument("--out", "-o", default=None, help="Write audited Output Envelope JSON.")
+    rp_rec.add_argument("--clock", default=None, help="Pinned ISO-8601 clock for determinism.")
+    rp_rec.add_argument("--externalize", action="store_true", help="Do not inline input (NFR-03).")
+    rp_rec.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_rec.set_defaults(func=cmd_replay_record)
+
+    rp_rep = rps.add_parser("replay", help="Replay a bundle/event into a new REPLAY event (FR-05/FR-06).")
+    rp_rep.add_argument("--bundle", default=None, help="ReplayBundle JSON path.")
+    rp_rep.add_argument("--event", default=None, help="Source EvaluationEvent id (replay-by-event-id).")
+    rp_rep.add_argument("--policy", default=None, help="Override policy version (FR-05).")
+    rp_rep.add_argument("--mode", default="EXACT", choices=["EXACT", "SEMANTIC", "EXPLANATORY"])
+    rp_rep.add_argument("--out", "-o", default=None, help="Write replay event JSON.")
+    rp_rep.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_rep.set_defaults(func=cmd_replay_replay)
+
+    rp_aud = rps.add_parser("audit", help="Audit export / verify / list (FR-09).")
+    rp_auds = rp_aud.add_subparsers(dest="audit_cmd", required=True)
+    rp_exp = rp_auds.add_parser("export", help="Export the chain as canonical JSONL.")
+    rp_exp.add_argument("--out", "-o", required=True, help="Output .jsonl path.")
+    rp_exp.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_exp.set_defaults(func=cmd_replay_audit_export)
+    rp_ver = rp_auds.add_parser("verify", help="Verify chain integrity (tamper detection).")
+    rp_ver.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_ver.set_defaults(func=cmd_replay_audit_verify)
+    rp_ev = rp_auds.add_parser("events", help="List recorded events.")
+    rp_ev.add_argument("--limit", type=int, default=100)
+    rp_ev.add_argument("--offset", type=int, default=0)
+    rp_ev.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_ev.set_defaults(func=cmd_replay_audit_events)
+
+    rp_ret = rps.add_parser("retention", help="Backup / restore / cleanup (audited, NFR-04).")
+    rp_rets = rp_ret.add_subparsers(dest="retention_cmd", required=True)
+    rp_bk = rp_rets.add_parser("backup", help="Back up the audit database.")
+    rp_bk.add_argument("--path", required=True, help="Backup .sqlite path.")
+    rp_bk.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_bk.set_defaults(func=cmd_replay_retention_backup)
+    rp_rs = rp_rets.add_parser("restore", help="Restore the audit database from a backup.")
+    rp_rs.add_argument("--path", required=True, help="Backup .sqlite path.")
+    rp_rs.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_rs.set_defaults(func=cmd_replay_retention_restore)
+    rp_cl = rp_rets.add_parser("cleanup", help="Clean up old audit OPERATION noise (audited).")
+    rp_cl.add_argument("--before", required=True, help="ISO-8601 cutoff; remove OPERATION events before this.")
+    rp_cl.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
+    rp_cl.set_defaults(func=cmd_replay_retention_cleanup)
     return p
 
 

@@ -57,7 +57,17 @@
     },
     "runestone": { "type": "object" },
     "audit_ref": { "type": "string", "minLength": 1 },
-    "replay_ref": { "type": ["string", "null"] },
+    "replay_ref": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["event_id", "event_digest", "bundle_ref"],
+      "properties": {
+        "event_id": { "type": "string", "pattern": "^evt_[0-9a-f]{16}$" },
+        "event_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "bundle_ref": { "type": "string", "pattern": "^bundle_[0-9a-f]{16}$" }
+      },
+      "description": "v1.4: real, resolvable reference to the recording EvaluationEvent. null when calling run_envelope directly (v1.2/v1.3 path). Forgery (non-null with unresolvable event_id) is a red-line violation detected by IntegrityChecker."
+    },
     "gate": {
       "type": "object",
       "additionalProperties": false,

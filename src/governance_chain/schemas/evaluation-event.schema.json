@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/evaluation-event.schema.json",
+  "title": "EvaluationEvent",
+  "description": "v1.4 immutable, append-only evaluation event (FR-01). The event is content-addressed: event_hash = SHA-256(canonical_json(event without event_hash/event_id/output_envelope)); event_id = 'evt_' + event_hash[:16]; previous_event_hash links the immutable chain (GENESIS for the first event). output_envelope is excluded from the event_hash to break the replay_ref self-reference cycle, and is instead integrity-checked via its own content_digest + replay_ref resolution by IntegrityChecker.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "event_id",
+    "event_type",
+    "replay_mode",
+    "source_original_event_id",
+    "recorded_at",
+    "previous_event_hash",
+    "version_bindings",
+    "input_ref",
+    "result_fingerprint",
+    "output_envelope",
+    "event_hash"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "const": "eve-1.4" },
+    "schema_version": { "type": "string", "const": "eve-1.4" },
+    "event_id": { "type": "string", "pattern": "^evt_[0-9a-f]{16}$" },
+    "event_type": { "type": "string", "enum": ["ORIGINAL", "REPLAY", "OPERATION"] },
+    "replay_mode": { "type": ["string", "null"], "enum": ["EXACT", "SEMANTIC", "EXPLANATORY", null] },
+    "source_original_event_id": { "type": ["string", "null"] },
+    "recorded_at": { "type": "string", "minLength": 1 },
+    "previous_event_hash": { "type": "string", "minLength": 1 },
+    "version_bindings": { "$ref": "#/$defs/version_bindings" },
+    "input_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "location"],
+      "properties": {
+        "digest": { "type": "string", "minLength": 1 },
+        "location": { "type": "string", "minLength": 1 }
+      }
+    },
+    "input_envelope": {
+      "type": ["object", "null"],
+      "description": "Inline input envelope when not externalized (NFR-03); null when externalized."
+    },
+    "result_fingerprint": { "type": "object" },
+    "output_envelope": {
+      "type": ["object", "null"],
+      "description": "Full goe-1.2; replay_ref filled with a real, resolvable reference after record/replay."
+    },
+    "operation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["action"],
+      "properties": {
+        "action": { "type": "string" },
+        "detail": { "type": "string" }
+      },
+      "description": "Present only for event_type=OPERATION (audited retention/backup/restore/cleanup)."
+    },
+    "event_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "version_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "schema",
+        "adapter",
+        "engine",
+        "profile",
+        "policy",
+        "knowledge",
+        "model",
+        "environment"
+      ],
+      "properties": {
+        "subject": { "type": "object" },
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["input", "output"],
+          "properties": {
+            "input": { "type": "string" },
+            "output": { "type": "string" }
+          }
+        },
+        "adapter": { "type": "object" },
+        "engine": { "type": "object" },
+        "profile": { "type": "object" },
+        "policy": { "type": "object" },
+        "knowledge": { "type": "object" },
+        "model": { "type": "object" },
+        "environment": { "type": "object" }
+      }
+    }
+  }
+}
