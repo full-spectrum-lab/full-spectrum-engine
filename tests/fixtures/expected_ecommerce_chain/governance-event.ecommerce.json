@@ -34,5 +34,12 @@
   "source_reference": {
     "source_type": "synthetic_dialogue",
     "source_id": "raw_ecom_001"
-  }
+  },
+  "relationships": [
+    {
+      "relation_type": "derived_from",
+      "target_type": "raw_input",
+      "target_id": "raw_ecom_001"
+    }
+  ]
 }

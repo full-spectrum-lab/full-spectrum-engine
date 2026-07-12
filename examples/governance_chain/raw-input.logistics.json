@@ -1,0 +1,10 @@
+{
+  "adapter_id": "logistics",
+  "raw_input": {
+    "raw_input_id": "raw_logistics_001",
+    "business_line": "logistics_cold_chain",
+    "shipment_id": "synthetic-shipment-001",
+    "temperature_evidence_complete": false,
+    "human_review_completed": false
+  }
+}

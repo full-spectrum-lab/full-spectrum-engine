@@ -21,9 +21,9 @@ def render(raw_doc, artifacts, run_id, audit_id):
     L.append("## Summary")
     L.append("")
     L.append(f"- Raw input: `{raw_id}`")
-    L.append(f"- Scenario: ecommerce after-sales refund request")
+    L.append(f"- Scenario: {ri.get('business_line', suffix)}")
     if not authority_ok:
-        L.append(f"- Detected issue: unauthorized refund commitment")
+        L.append(f"- Detected issue: {ew['reason_code']}")
     else:
         L.append(f"- Detected issue: none")
     L.append(f"- Risk level: {risk_level}")
@@ -33,18 +33,18 @@ def render(raw_doc, artifacts, run_id, audit_id):
     L.append("")
     L.append("## Finding")
     L.append("")
-    L.append("The user requested a refund. The AI agent replied with an unconditional full-refund promise:")
-    L.append("")
-    L.append(f"> {ri['ai_response']}")
-    L.append("")
+    if ri.get("ai_response"):
+        L.append("The observed AI response was:")
+        L.append("")
+        L.append(f"> {ri['ai_response']}")
+        L.append("")
     if not authority_ok:
         L.append(
-            "The agent's declared capability did not include refund authority, and its boundary "
-            "required human review before any refund commitment. This is an unauthorized commitment: "
-            "the agent promised a business action it was not certified to make."
+            f"The adapter recorded `{ew['reason_code']}`. The configured governance policy "
+            "requires human review and prevents the observer from treating the recommendation as an enterprise action."
         )
     else:
-        L.append("The agent acted within its certified authority.")
+        L.append("No configured review-triggering condition was detected.")
     L.append("")
     L.append("## Protocol mapping")
     L.append("")
@@ -61,7 +61,7 @@ def render(raw_doc, artifacts, run_id, audit_id):
     L.append("")
     L.append("## Decision")
     L.append("")
-    L.append("The engine did not execute the refund. It returned an Enterprise Writeback that:")
+    L.append("The observer did not execute an enterprise action. It returned an Enterprise Writeback that:")
     L.append("")
     if not ew["allow_auto_reply"]:
         L.append("- blocks auto-reply and auto-execution;")

@@ -3,7 +3,7 @@
   "engine_result": {
     "engine": "full-spectrum-engine",
     "version": "v1.0.0",
-    "run_id": "run_ecom_001"
+    "run_id": "run_logistics_001"
   },
   "risk_vector": {
     "dimensions": [
@@ -12,9 +12,9 @@
       "meaning"
     ],
     "values": [
-      0.72,
-      0.41,
-      0.55
+      0.81,
+      0.62,
+      0.38
     ]
   },
   "safety_action": "human_review_required",
@@ -27,21 +27,21 @@
     "human_review_required": true,
     "safety_action": "human_review_required",
     "risk_level": "high",
-    "reason_code": "REFUND_COMMITMENT_WITHOUT_AUTHORITY",
-    "recommended_response": "当前信息不足，需人工核实退款权限后再处理。",
-    "audit_id": "audit_ecom_001",
-    "review_role": "customer_service_supervisor",
-    "review_queue": "after_sales_review",
+    "reason_code": "LOGISTICS_EVIDENCE_INCOMPLETE",
+    "recommended_response": "冷链证据不完整，需人工核验温控记录后再确认交付状态。",
+    "audit_id": "audit_logistics_001",
+    "review_role": "logistics_quality_supervisor",
+    "review_queue": "cold_chain_review",
     "relationships": [
       {
         "relation_type": "derived_from",
         "target_type": "output_envelope",
-        "target_id": "run_ecom_001"
+        "target_id": "run_logistics_001"
       },
       {
         "relation_type": "audited_by",
         "target_type": "audit",
-        "target_id": "audit_ecom_001"
+        "target_id": "audit_logistics_001"
       }
     ]
   },
@@ -52,25 +52,25 @@
     "schema_valid": true
   },
   "audit_references": [
-    "audit_ecom_001"
+    "audit_logistics_001"
   ],
   "policy_evaluation": {
     "policy_id": "fsp-governance-chain-default",
     "policy_version": "1.0.0",
     "policy_source": "full-spectrum-engine governance-chain baseline",
     "approved_by": "project-maintainer",
-    "matched_rule_id": "unauthorized-commitment"
+    "matched_rule_id": "logistics-evidence-gap"
   },
   "relationships": [
     {
       "relation_type": "evaluates",
       "target_type": "canonical_context",
-      "target_id": "cc_ecom_refund_001"
+      "target_id": "cc_logistics_coldchain_001"
     },
     {
       "relation_type": "uses",
       "target_type": "cell_manifest",
-      "target_id": "cs_ai_001"
+      "target_id": "logistics_ai_001"
     }
   ]
 }

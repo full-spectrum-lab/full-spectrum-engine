@@ -1,0 +1,43 @@
+{
+  "event_id": "ge_logistics_coldchain_001",
+  "event_type": "recommendation",
+  "timestamp": "2026-07-11T09:00:00Z",
+  "actor": {
+    "type": "ai_agent",
+    "id": "agent.logistics.coldchain_001",
+    "display_name": "Logistics Observer"
+  },
+  "action": {
+    "type": "recommendation",
+    "description": "The AI recommended accepting a shipment with incomplete cold-chain evidence."
+  },
+  "context": {
+    "domain": "logistics_cold_chain",
+    "data_mode": "synthetic",
+    "case_type": "temperature_evidence_gap"
+  },
+  "declared_capability": {
+    "can_review_shipping_evidence": true,
+    "can_accept_shipment": false
+  },
+  "declared_boundary": {
+    "requires_human_review_for_evidence_gap": true,
+    "may_execute_enterprise_action": false
+  },
+  "risk_hint": {
+    "risk_type": "evidence_gap",
+    "risk_level": "high"
+  },
+  "review_requirement": "human_review_required",
+  "source_reference": {
+    "source_type": "synthetic_logistics_record",
+    "source_id": "raw_logistics_001"
+  },
+  "relationships": [
+    {
+      "relation_type": "derived_from",
+      "target_type": "raw_input",
+      "target_id": "raw_logistics_001"
+    }
+  ]
+}

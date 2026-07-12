@@ -17,11 +17,19 @@
     "reason": "AI customer-service agent lacks refund commitment authority."
   },
   "known_facts": [
-    {"description": "User requested a refund."},
-    {"description": "AI made a full-refund commitment without authority."}
+    {
+      "description": "User requested a refund."
+    },
+    {
+      "description": "AI made a full-refund commitment without authority."
+    }
   ],
   "unknowns": [
-    {"description": "Human review has not been completed.", "severity": "high", "required_for_commitment": true}
+    {
+      "description": "Human review has not been completed.",
+      "severity": "high",
+      "required_for_commitment": true
+    }
   ],
   "risk_axes": {
     "commitment_risk": 0.9,
@@ -32,5 +40,17 @@
     "public_shareable": true,
     "redaction_status": "synthetic"
   },
-  "extension_fields": {}
+  "extension_fields": {},
+  "relationships": [
+    {
+      "relation_type": "normalized_from",
+      "target_type": "governance_event",
+      "target_id": "ge_ecom_refund_001"
+    },
+    {
+      "relation_type": "derived_from",
+      "target_type": "raw_input",
+      "target_id": "raw_ecom_001"
+    }
+  ]
 }

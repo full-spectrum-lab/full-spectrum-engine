@@ -22,7 +22,7 @@ ARTIFACT_KINDS = (
 )
 
 
-def build_chain(raw_doc: Dict[str, Any], timestamp: str = None) -> Tuple[Dict[str, Any], str, str]:
+def build_chain(raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str = None) -> Tuple[Dict[str, Any], str, str]:
     adapter = get_adapter(raw_doc.get("adapter_id"))
     ts = timestamp or DEFAULT_TIMESTAMP
 
@@ -35,7 +35,15 @@ def build_chain(raw_doc: Dict[str, Any], timestamp: str = None) -> Tuple[Dict[st
     run_id = f"run_{stem}_{num}"
     audit_id = f"audit_{stem}_{num}"
 
-    envelope, ew = run(cc, cell, adapter, run_id, audit_id)
+    envelope, ew = run(cc, cell, adapter, run_id, audit_id, policy_path=policy_path)
+    envelope["relationships"] = [
+        {"relation_type": "evaluates", "target_type": "canonical_context", "target_id": cc["canonical_context_id"]},
+        {"relation_type": "uses", "target_type": "cell_manifest", "target_id": cell["cell_id"]},
+    ]
+    ew["relationships"] = [
+        {"relation_type": "derived_from", "target_type": "output_envelope", "target_id": run_id},
+        {"relation_type": "audited_by", "target_type": "audit", "target_id": audit_id},
+    ]
 
     artifacts = {
         "governance-event": ge,
@@ -58,8 +66,8 @@ def build_chain(raw_doc: Dict[str, Any], timestamp: str = None) -> Tuple[Dict[st
     return artifacts, run_id, audit_id
 
 
-def write_chain(out_dir: str, raw_doc: Dict[str, Any], timestamp: str = None) -> Tuple[Dict[str, str], Dict[str, Any]]:
-    artifacts, run_id, audit_id = build_chain(raw_doc, timestamp=timestamp)
+def write_chain(out_dir: str, raw_doc: Dict[str, Any], timestamp: str = None, policy_path: str = None) -> Tuple[Dict[str, str], Dict[str, Any]]:
+    artifacts, run_id, audit_id = build_chain(raw_doc, timestamp=timestamp, policy_path=policy_path)
     os.makedirs(out_dir, exist_ok=True)
     suffix = raw_doc["adapter_id"]
     writes = {}

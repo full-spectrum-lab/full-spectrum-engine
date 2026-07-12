@@ -71,6 +71,29 @@
       "type": "array",
       "items": { "type": "string" },
       "description": "Links to AuditTrace / report."
+    },
+    "policy_evaluation": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Versioned policy provenance and matched rule retained for replay."
+    },
+    "relationships": {
+      "$ref": "#/$defs/relationships"
+    }
+  },
+  "$defs": {
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation_type", "target_type", "target_id"],
+        "properties": {
+          "relation_type": { "type": "string" },
+          "target_type": { "type": "string" },
+          "target_id": { "type": "string" }
+        }
+      }
     }
   }
 }

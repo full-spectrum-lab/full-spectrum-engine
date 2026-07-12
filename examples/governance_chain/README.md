@@ -1,4 +1,10 @@
-# Governance Chain — Ecommerce Example
+# Governance Chain — Executable Adapter Examples
+
+Three deterministic adapters are committed: `ecommerce`, `logistics` and
+`knowledge_conflict`. Every adapter has a golden fixture, protocol-schema
+validation and CI generation. Decisions are loaded from the versioned policy
+at `src/governance_chain/policies/governance-rules.v1.json`; `--policy` can
+replay the same input against another reviewed policy version.
 
 This folder is the runnable input for the Full Spectrum governance-chain CLI.
 

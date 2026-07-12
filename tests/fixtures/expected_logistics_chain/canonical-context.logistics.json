@@ -1,0 +1,52 @@
+{
+  "schema_version": "cc-0.1",
+  "canonical_context_id": "cc_logistics_coldchain_001",
+  "source_event_id": "ge_logistics_coldchain_001",
+  "actor": {
+    "id": "logistics_ai_001",
+    "type": "ai_agent"
+  },
+  "action": {
+    "intent": "shipment_acceptance_review",
+    "commitment_type": "operational_recommendation",
+    "authority_verified": false
+  },
+  "authority": {
+    "verified": false,
+    "reason_code": "LOGISTICS_EVIDENCE_INCOMPLETE",
+    "reason": "Required cold-chain evidence is incomplete."
+  },
+  "known_facts": [
+    {
+      "description": "Shipment is awaiting acceptance."
+    }
+  ],
+  "unknowns": [
+    {
+      "description": "Continuous temperature evidence is incomplete.",
+      "severity": "high",
+      "required_for_commitment": true
+    }
+  ],
+  "risk_axes": {
+    "evidence_risk": 0.9,
+    "coordination_risk": 0.7
+  },
+  "privacy": {
+    "public_shareable": true,
+    "redaction_status": "synthetic"
+  },
+  "extension_fields": {},
+  "relationships": [
+    {
+      "relation_type": "normalized_from",
+      "target_type": "governance_event",
+      "target_id": "ge_logistics_coldchain_001"
+    },
+    {
+      "relation_type": "derived_from",
+      "target_type": "raw_input",
+      "target_id": "raw_logistics_001"
+    }
+  ]
+}

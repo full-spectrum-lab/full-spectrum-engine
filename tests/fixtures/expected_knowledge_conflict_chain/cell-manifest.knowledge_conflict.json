@@ -1,7 +1,7 @@
 {
-  "cell_id": "cs_ai_001",
-  "cell_type": "ai_customer_service",
-  "domain": "ecommerce_after_sales",
+  "cell_id": "knowledge_ai_001",
+  "cell_type": "ai_knowledge_observer",
+  "domain": "enterprise_knowledge_governance",
   "certification": {
     "issuer_type": "enterprise",
     "issuer_id": "enterprise_cert_node_001",
@@ -21,7 +21,7 @@
   "unknown_policy": "declare_unknown_and_escalate",
   "human_anchor": {
     "anchor_type": "role",
-    "anchor_id": "customer_service_supervisor"
+    "anchor_id": "knowledge_governance_owner"
   },
   "lifecycle": {
     "status": "active",
@@ -31,7 +31,7 @@
     {
       "relation_type": "declared_for",
       "target_type": "raw_input",
-      "target_id": "raw_ecom_001"
+      "target_id": "raw_knowledge_001"
     }
   ]
 }

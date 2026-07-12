@@ -1,0 +1,39 @@
+{
+  "policy_id": "fsp-governance-chain-default",
+  "version": "1.0.0",
+  "source": "full-spectrum-engine governance-chain baseline",
+  "approved_by": "project-maintainer",
+  "approved_at": "2026-07-12T00:00:00Z",
+  "change_log": [
+    {
+      "version": "1.0.0",
+      "date": "2026-07-12",
+      "summary": "Extract ecommerce, logistics and knowledge-conflict decisions from code."
+    }
+  ],
+  "rules": [
+    {
+      "rule_id": "unauthorized-commitment",
+      "when_reason_code": "REFUND_COMMITMENT_WITHOUT_AUTHORITY",
+      "risk_level": "high",
+      "safety_action": "human_review_required"
+    },
+    {
+      "rule_id": "logistics-evidence-gap",
+      "when_reason_code": "LOGISTICS_EVIDENCE_INCOMPLETE",
+      "risk_level": "high",
+      "safety_action": "human_review_required"
+    },
+    {
+      "rule_id": "knowledge-source-conflict",
+      "when_reason_code": "KNOWLEDGE_SOURCE_CONFLICT",
+      "risk_level": "high",
+      "safety_action": "human_review_required"
+    }
+  ],
+  "default": {
+    "rule_id": "default-observe-and-log",
+    "risk_level": "low",
+    "safety_action": "allow_with_logging"
+  }
+}

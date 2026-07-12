@@ -1,0 +1,43 @@
+{
+  "event_id": "ge_knowledge_knowledge_001",
+  "event_type": "recommendation",
+  "timestamp": "2026-07-11T09:00:00Z",
+  "actor": {
+    "type": "ai_agent",
+    "id": "agent.knowledge.001",
+    "display_name": "Knowledge Observer"
+  },
+  "action": {
+    "type": "recommendation",
+    "description": "The AI selected an answer while authoritative knowledge sources disagreed."
+  },
+  "context": {
+    "domain": "enterprise_knowledge",
+    "data_mode": "synthetic",
+    "case_type": "knowledge_source_conflict"
+  },
+  "declared_capability": {
+    "can_compare_sources": true,
+    "can_resolve_authority_conflict": false
+  },
+  "declared_boundary": {
+    "requires_human_review_for_source_conflict": true,
+    "may_execute_enterprise_action": false
+  },
+  "risk_hint": {
+    "risk_type": "knowledge_conflict",
+    "risk_level": "high"
+  },
+  "review_requirement": "human_review_required",
+  "source_reference": {
+    "source_type": "synthetic_knowledge_sources",
+    "source_id": "raw_knowledge_001"
+  },
+  "relationships": [
+    {
+      "relation_type": "derived_from",
+      "target_type": "raw_input",
+      "target_id": "raw_knowledge_001"
+    }
+  ]
+}

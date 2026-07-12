@@ -1,0 +1,11 @@
+{
+  "adapter_id": "knowledge_conflict",
+  "raw_input": {
+    "raw_input_id": "raw_knowledge_001",
+    "business_line": "enterprise_knowledge",
+    "source_a": "policy-v2",
+    "source_b": "faq-v1",
+    "conflict_resolved": false,
+    "human_review_completed": false
+  }
+}

@@ -39,5 +39,24 @@
     "audit_id": { "type": "string" },
     "review_role": { "type": "string" },
     "review_queue": { "type": "string" }
+    ,
+    "relationships": {
+      "$ref": "#/$defs/relationships"
+    }
+  },
+  "$defs": {
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["relation_type", "target_type", "target_id"],
+        "properties": {
+          "relation_type": { "type": "string" },
+          "target_type": { "type": "string" },
+          "target_id": { "type": "string" }
+        }
+      }
+    }
   }
 }

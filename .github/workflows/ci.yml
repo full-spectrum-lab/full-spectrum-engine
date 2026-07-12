@@ -47,14 +47,18 @@ jobs:
         run: |
           python examples/run_ecommerce_adapter.py --metrics examples/metrics_ecommerce_conflict.json --seed 42
 
-      - name: Generate governance chain (ecommerce example)
+      - name: Generate governance chains (all adapters)
         run: |
           python -m src.governance_chain generate --input examples/governance_chain/raw-input.ecommerce.json --out out/governance_chain
+          python -m src.governance_chain generate --input examples/governance_chain/raw-input.logistics.json --out out/governance-chain-logistics
+          python -m src.governance_chain generate --input examples/governance_chain/raw-input.knowledge_conflict.json --out out/governance-chain-knowledge-conflict
 
       - name: Validate governance chain artifacts
         run: |
           python -m src.governance_chain validate out/governance_chain
+          python -m src.governance_chain validate out/governance-chain-logistics
+          python -m src.governance_chain validate out/governance-chain-knowledge-conflict
 
       - name: Run governance chain unit tests
         run: |
-          python -m pytest tests/test_governance_chain.py -v
+          python -m pytest tests/test_governance_chain.py tests/test_governance_chain_adapters.py -v

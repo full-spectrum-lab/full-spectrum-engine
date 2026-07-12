@@ -1,0 +1,52 @@
+{
+  "schema_version": "cc-0.1",
+  "canonical_context_id": "cc_knowledge_knowledge_001",
+  "source_event_id": "ge_knowledge_knowledge_001",
+  "actor": {
+    "id": "knowledge_ai_001",
+    "type": "ai_agent"
+  },
+  "action": {
+    "intent": "answer_from_enterprise_knowledge",
+    "commitment_type": "knowledge_recommendation",
+    "authority_verified": false
+  },
+  "authority": {
+    "verified": false,
+    "reason_code": "KNOWLEDGE_SOURCE_CONFLICT",
+    "reason": "Authoritative sources disagree and no owner resolution is recorded."
+  },
+  "known_facts": [
+    {
+      "description": "Two enterprise knowledge sources provide different answers."
+    }
+  ],
+  "unknowns": [
+    {
+      "description": "The governing source version is unresolved.",
+      "severity": "high",
+      "required_for_commitment": true
+    }
+  ],
+  "risk_axes": {
+    "knowledge_conflict_risk": 0.95,
+    "meaning_risk": 0.85
+  },
+  "privacy": {
+    "public_shareable": true,
+    "redaction_status": "synthetic"
+  },
+  "extension_fields": {},
+  "relationships": [
+    {
+      "relation_type": "normalized_from",
+      "target_type": "governance_event",
+      "target_id": "ge_knowledge_knowledge_001"
+    },
+    {
+      "relation_type": "derived_from",
+      "target_type": "raw_input",
+      "target_id": "raw_knowledge_001"
+    }
+  ]
+}
