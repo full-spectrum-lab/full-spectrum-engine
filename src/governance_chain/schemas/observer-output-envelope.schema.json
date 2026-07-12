@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/observer-output-envelope.schema.json",
+  "title": "ObserverOutputEnvelope",
+  "description": "v1.2 observer output contract (SRS §3.3). Pairs with input-envelope (gie-1.2). explanation/runestone/audit_ref/replay_ref are split; replay_ref is optional (full Replay deferred to v1.4). external_effect is always false in v1.2 (L4_CANDIDATE is not yet active).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "analysis_result",
+    "fshi_measurement",
+    "risk_vector",
+    "explanation",
+    "runestone",
+    "audit_ref",
+    "content_digest",
+    "l4_mode",
+    "external_effect"
+  ],
+  "properties": {
+    "schema_id": { "type": "string", "const": "goe-1.2" },
+    "schema_version": { "type": "string", "const": "goe-1.2" },
+    "contract_version": { "type": "string", "minLength": 1 },
+    "analysis_result": { "type": "object" },
+    "fshi_measurement": { "type": "object" },
+    "risk_vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dimensions", "values"],
+      "properties": {
+        "dimensions": { "type": "array", "items": { "type": "string" } },
+        "values": { "type": "array", "items": { "type": "number" } },
+        "note": { "type": "string" }
+      }
+    },
+    "ess_candidates": { "type": "array" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "human_review_recommendation": { "type": "object" },
+    "explanation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text"],
+      "properties": {
+        "text": { "type": "string" },
+        "basis": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "runestone": { "type": "object" },
+    "audit_ref": { "type": "string", "minLength": 1 },
+    "replay_ref": { "type": ["string", "null"] },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layer_flow", "qualification", "authorization", "mutual_auth", "effective_state"],
+      "properties": {
+        "layer_flow": { "$ref": "#/$defs/gate_record" },
+        "qualification": { "$ref": "#/$defs/gate_record" },
+        "authorization": { "$ref": "#/$defs/gate_record" },
+        "mutual_auth": { "$ref": "#/$defs/gate_record" },
+        "effective_state": { "type": "string", "enum": ["INTERNAL_ONLY", "EXTERNAL_CANDIDATE", "EXTERNAL_ACTIVE"] }
+      }
+    },
+    "l4_mode": { "type": "string", "enum": ["DISABLED", "LOCAL_SIMULATION", "NETWORK_CANDIDATE"] },
+    "external_effect": { "type": "boolean", "const": false },
+    "content_digest": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "gate_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reason_code"],
+      "properties": {
+        "state": { "type": "string", "enum": ["OPEN", "CLOSED", "INTERNAL_OPEN_EXTERNAL_CLOSED"] },
+        "reason_code": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

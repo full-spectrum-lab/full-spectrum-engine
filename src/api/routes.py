@@ -37,8 +37,9 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
-from .models import EvaluateRequest, RunestoneRequest, HealthResponse
+from .models import EvaluateRequest, RunestoneRequest, HealthResponse, EnvelopeRequest
 from .registry import get_registry
+from src.governance_chain import envelope as envelope_mod
 
 # Ensure project root is on sys.path so we can import simulate.py
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -692,3 +693,43 @@ async def delete_data(
                 "error_code": "VALIDATION_ERROR",
             },
         )
+
+
+# ============================================================
+# 端点 9: POST /api/v1/envelope  (v1.2 Observer I/O contract)
+# ============================================================
+
+@router.post("/envelope")
+async def envelope_run(req: EnvelopeRequest, response: Response):
+    """
+    v1.2 Observer Input/Output Envelope endpoint.
+
+    Request body = v1.2 Input Envelope (EnvelopeRequest.input_envelope).
+    Response body = v1.2 Output Envelope, produced by the SAME
+    `envelope.run_envelope` function the CLI uses, so REST and CLI are
+    byte-for-byte equivalent (FR-03 / AC-01). Pure local computation; no
+    network calls. L4_CANDIDATE references are carried but never produce
+    external effect (external_effect is always false in v1.2).
+    """
+    _set_metadata_headers(response)
+    try:
+        out = envelope_mod.run_envelope(req.input_envelope)
+    except envelope_mod.InputEnvelopeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={
+                "message": f"Input Envelope invalid: {exc}",
+                "error_code": "INPUT_ENVELOPE_INVALID",
+                "errors": exc.errors,
+            },
+        )
+    ok, errors = envelope_mod.validate_output_envelope(out)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "message": f"Output Envelope failed schema validation: {errors}",
+                "error_code": "OUTPUT_ENVELOPE_INVALID",
+            },
+        )
+    return out

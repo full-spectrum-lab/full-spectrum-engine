@@ -79,6 +79,21 @@ class EvaluateRequest(BaseModel):
     )
 
 
+class EnvelopeRequest(BaseModel):
+    """
+    POST /api/v1/envelope request body (v1.2 Observer Input/Output Envelope contract).
+
+    The body IS the v1.2 Input Envelope (see input-envelope.schema.json / gie-1.2).
+    The response body is the v1.2 Output Envelope, produced by the exact same
+    `src.governance_chain.envelope.run_envelope` function the CLI uses, so the
+    REST and CLI outputs are byte-for-byte equivalent (FR-03 / AC-01).
+    """
+    input_envelope: Dict[str, Any] = Field(
+        ...,
+        description="v1.2 Input Envelope: layer/scope/subject_refs/business_data/unknowns/gate/l4_mode ..."
+    )
+
+
 class RunestoneRequest(BaseModel):
     """
     POST /api/v1/runestone request body

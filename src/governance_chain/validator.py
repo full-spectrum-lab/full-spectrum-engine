@@ -25,6 +25,8 @@ SCHEMA_MAP = {
     "l1-cell-protocol": "l1-cell-protocol.schema.json",
     "output-envelope": "governance-output-envelope.schema.json",
     "governance-output-envelope": "governance-output-envelope.schema.json",
+    "input-envelope": "input-envelope.schema.json",
+    "observer-output-envelope": "observer-output-envelope.schema.json",
     "enterprise-writeback": "enterprise-writeback.schema.json",
     "canonical-context": "canonical-context.schema.json",
     "subject-declaration": "subject-declaration.schema.json",

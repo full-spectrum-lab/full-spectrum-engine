@@ -1,0 +1,34 @@
+{
+  "schema_id": "gie-1.2",
+  "schema_version": "gie-1.2",
+  "contract_version": "1.2.0",
+  "layer": "L1",
+  "scope": "internal",
+  "subject_refs": ["subj_ecom_001"],
+  "relationship_refs": ["ge_ecom_refund_001"],
+  "business_data": {
+    "industry": "ecommerce_customer_service",
+    "scenario": "after_sales_unauthorized_refund",
+    "order_id": "ORD-2026-001",
+    "amount": 499.0
+  },
+  "evidence_refs": ["evt_ecom_refund_001"],
+  "known_facts": {},
+  "unknowns": {},
+  "profile_refs": [],
+  "knowledge_source_refs": [],
+  "credential_refs": [],
+  "verification_result_refs": [],
+  "authorization_refs": [],
+  "gate": {
+    "layer_flow": { "state": "INTERNAL_OPEN_EXTERNAL_CLOSED", "reason_code": "INTERNAL_OPEN_EXTERNAL_CLOSED" },
+    "qualification": { "state": "INTERNAL_OPEN_EXTERNAL_CLOSED", "reason_code": "INTERNAL_OPEN_EXTERNAL_CLOSED" },
+    "authorization": { "state": "CLOSED", "reason_code": "EXTERNAL_CLOSED_BY_DEFAULT" },
+    "mutual_auth": { "state": "CLOSED", "reason_code": "EXTERNAL_CLOSED_BY_DEFAULT" },
+    "effective_state": "INTERNAL_ONLY"
+  },
+  "l4_mode": "DISABLED",
+  "l4_refs": {},
+  "context_metadata": { "source": "examples/envelope/input-envelope.ecommerce.json" },
+  "audit_metadata": { "operator": "workbuddy", "trace_id": "trace_ecom_001" }
+}

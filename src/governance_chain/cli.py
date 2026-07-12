@@ -17,6 +17,7 @@ import sys
 
 from .generate import write_chain
 from . import validator
+from . import envelope as envelope_mod
 from src.subject import load_declaration, normalize_declaration, SubjectDeclarationError
 
 
@@ -93,6 +94,82 @@ def cmd_validate(args):
     return 1 if failures else 0
 
 
+def cmd_envelope_validate_input(args):
+    with open(args.input, encoding="utf-8-sig") as f:
+        env = json.load(f)
+    ok, errors = envelope_mod.validate_input_envelope(env)
+    if not ok:
+        for e in errors:
+            print(f"  [FAIL] {e}", file=sys.stderr)
+        print("Input Envelope validation FAILED.", file=sys.stderr)
+        return 1
+    # Explicit UNKNOWN handling (FR-07): missing evidence with no unknowns declared is a defect.
+    if not env.get("evidence_refs") and not env.get("unknowns"):
+        print("  [WARN] no evidence_refs and no unknowns declared; UNKNOWN must be explicit.", file=sys.stderr)
+    print(f"Input Envelope valid (schema_id={env.get('schema_id')}, layer={env.get('layer')}, scope={env.get('scope')}).")
+    return 0
+
+
+def cmd_envelope_run(args):
+    with open(args.input, encoding="utf-8-sig") as f:
+        env = json.load(f)
+    try:
+        out = envelope_mod.run_envelope(env)
+    except envelope_mod.InputEnvelopeError as exc:
+        print(f"error: INPUT_ENVELOPE_INVALID: {exc}", file=sys.stderr)
+        for e in (exc.errors or []):
+            print(f"  - {e}", file=sys.stderr)
+        return 2
+    ok, errors = envelope_mod.validate_output_envelope(out)
+    if not ok:
+        for e in errors:
+            print(f"  [FAIL] {e}", file=sys.stderr)
+        print("Output Envelope validation FAILED.", file=sys.stderr)
+        return 1
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as f:
+            json.dump(out, f, ensure_ascii=False, indent=2)
+        print(f"Observer Output Envelope written to {args.out}")
+    else:
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_envelope_check_links(args):
+    with open(args.input, encoding="utf-8-sig") as f:
+        env = json.load(f)
+    known = set()
+    if args.known:
+        raw = args.known.strip()
+        data = None
+        # Accept inline JSON ({...} / [...]) directly; otherwise treat as file path.
+        if raw[:1] in ("{", "["):
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError:
+                data = None
+        if data is None:
+            with open(args.known, encoding="utf-8-sig") as f:
+                data = json.load(f)
+        # known ids may be a list of objects (with 'id') or a bare list of ids
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, dict) and item.get("id"):
+                    known.add(item["id"])
+                elif isinstance(item, str):
+                    known.add(item)
+        elif isinstance(data, dict):
+            known.update(data.get("known_ids", []))
+    broken = envelope_mod.check_envelope_links(env, known)
+    if broken:
+        for kind, ref in broken:
+            print(f"  [BROKEN] {kind}: {ref}", file=sys.stderr)
+        print(f"{len(broken)} broken reference(s) detected (not silently passed).", file=sys.stderr)
+        return 1
+    print("No broken references; all declared subject/relationship refs resolve.")
+    return 0
+
+
 def build_parser():
     p = argparse.ArgumentParser(
         prog="fsengine-govchain",
@@ -115,6 +192,20 @@ def build_parser():
     v.add_argument("dir", nargs="?", help="Directory of JSON artifacts.")
     v.add_argument("--input", "-i", help="A single JSON file to validate instead of a directory.")
     v.set_defaults(func=cmd_validate)
+
+    e = sub.add_parser("envelope", help="v1.2 Observer Input/Output Envelope operations.")
+    esub = e.add_subparsers(dest="envelope_cmd", required=True)
+    ev = esub.add_parser("validate-input", help="Validate an Input Envelope against the v1.2 schema (FR-01).")
+    ev.add_argument("--input", "-i", required=True, help="Path to an Input Envelope JSON.")
+    ev.set_defaults(func=cmd_envelope_validate_input)
+    er = esub.add_parser("run", help="Run the v1.2 Observer over an Input Envelope and emit the Output Envelope (FR-03).")
+    er.add_argument("--input", "-i", required=True, help="Path to an Input Envelope JSON.")
+    er.add_argument("--out", "-o", default=None, help="Write the Output Envelope JSON to this path instead of stdout.")
+    er.set_defaults(func=cmd_envelope_run)
+    el = esub.add_parser("check-links", help="Detect broken subject/relationship references (FR-02 / AC-05).")
+    el.add_argument("--input", "-i", required=True, help="Path to an Input Envelope JSON.")
+    el.add_argument("--known", "-k", default=None, help="Path to known-id set (list of objects with 'id', or {\"known_ids\":[...]}).")
+    el.set_defaults(func=cmd_envelope_check_links)
     return p
 
 
