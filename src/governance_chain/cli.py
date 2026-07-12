@@ -170,6 +170,116 @@ def cmd_envelope_check_links(args):
     return 0
 
 
+def _load_json_file(path):
+    with open(path, encoding="utf-8-sig") as handle:
+        return json.load(handle)
+
+
+# ----------------------------------------------------------------
+# v1.3 profile subcommand group (FR-01)
+# ----------------------------------------------------------------
+def cmd_profile_validate(args):
+    from src.governance_chain.profiles.registry import ProfileRegistry
+    obj = _load_json_file(args.input)
+    reg = ProfileRegistry()  # schema-only validation; no fixture load needed
+    ok, errors = reg.validate(obj)
+    if not ok:
+        for e in errors:
+            print(f"  [FAIL] {e}", file=sys.stderr)
+        print("Profile validation FAILED.", file=sys.stderr)
+        return 1
+    print(f"Profile valid (profile_type={obj.get('profile_type')}, "
+          f"id={obj.get('id')}@{obj.get('version')}).")
+    return 0
+
+
+def cmd_profile_list(args):
+    from src.governance_chain.profiles.registry import get_default_registry
+    reg = get_default_registry()
+    ids = reg.list_ids()
+    print(f"{len(ids)} profile id(s):")
+    for pid in ids:
+        for ver in reg.all_versions(pid):
+            print(f"  - {pid}@{ver}")
+    return 0
+
+
+def cmd_profile_show(args):
+    from src.governance_chain.profiles.registry import get_default_registry
+    reg = get_default_registry()
+    try:
+        obj = reg.get(args.id, args.version)
+    except KeyError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as handle:
+            json.dump(obj, handle, ensure_ascii=False, indent=2)
+        print(f"Profile written to {args.out}")
+    else:
+        print(json.dumps(obj, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_profile_run(args):
+    env = _load_json_file(args.input)
+    try:
+        out = envelope_mod.run_envelope(env)
+    except envelope_mod.InputEnvelopeError as exc:
+        print(f"error: INPUT_ENVELOPE_INVALID: {exc}", file=sys.stderr)
+        for e in (exc.errors or []):
+            print(f"  - {e}", file=sys.stderr)
+        return 2
+    ok, errors = envelope_mod.validate_output_envelope(out)
+    if not ok:
+        for e in errors:
+            print(f"  [FAIL] {e}", file=sys.stderr)
+        print("Output Envelope validation FAILED.", file=sys.stderr)
+        return 1
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as handle:
+            json.dump(out, handle, ensure_ascii=False, indent=2)
+        print(f"Observer Output Envelope written to {args.out}")
+    else:
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+    return 0
+
+
+# ----------------------------------------------------------------
+# v1.3 policy subcommand group (FR-02)
+# ----------------------------------------------------------------
+def cmd_policy_validate(args):
+    from src.governance_chain.policy import load_policy
+    try:
+        policy = load_policy(args.input)
+    except Exception as exc:  # noqa: BLE001
+        print(f"error: policy invalid: {exc}", file=sys.stderr)
+        return 1
+    print(f"Policy valid: policy_id={policy.get('policy_id')} "
+          f"version={policy.get('version')}")
+    return 0
+
+
+def cmd_policy_list(args):
+    from src.governance_chain.policy import load_policy
+    policy = load_policy()
+    print(f"default policy: policy_id={policy.get('policy_id')} "
+          f"version={policy.get('version')} source={policy.get('source')}")
+    return 0
+
+
+def cmd_policy_show(args):
+    from src.governance_chain.policy import load_policy
+    policy = load_policy()
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as handle:
+            json.dump(policy, handle, ensure_ascii=False, indent=2)
+        print(f"Policy written to {args.out}")
+    else:
+        print(json.dumps(policy, ensure_ascii=False, indent=2))
+    return 0
+
+
 def build_parser():
     p = argparse.ArgumentParser(
         prog="fsengine-govchain",
@@ -206,6 +316,36 @@ def build_parser():
     el.add_argument("--input", "-i", required=True, help="Path to an Input Envelope JSON.")
     el.add_argument("--known", "-k", default=None, help="Path to known-id set (list of objects with 'id', or {\"known_ids\":[...]}).")
     el.set_defaults(func=cmd_envelope_check_links)
+
+    # ---- v1.3 profile subcommand group (additive; FR-01) ----
+    pf = sub.add_parser("profile", help="v1.3 Profile operations (validate/list/show/run).")
+    pfs = pf.add_subparsers(dest="profile_cmd", required=True)
+    pf_validate = pfs.add_parser("validate", help="Validate a Profile JSON against profile.schema.json.")
+    pf_validate.add_argument("--input", "-i", required=True, help="Path to a Profile JSON.")
+    pf_validate.set_defaults(func=cmd_profile_validate)
+    pf_list = pfs.add_parser("list", help="List loaded Profiles (id@version).")
+    pf_list.set_defaults(func=cmd_profile_list)
+    pf_show = pfs.add_parser("show", help="Show a Profile by id (optionally pinned version).")
+    pf_show.add_argument("--id", required=True, help="Profile id.")
+    pf_show.add_argument("--version", default=None, help="Profile version (default: latest approved).")
+    pf_show.add_argument("--out", "-o", default=None, help="Write the Profile JSON to this path instead of stdout.")
+    pf_show.set_defaults(func=cmd_profile_show)
+    pf_run = pfs.add_parser("run", help="Run the Observer over an Input Envelope using its profile refs (FR-05).")
+    pf_run.add_argument("--input", "-i", required=True, help="Path to an Input Envelope JSON.")
+    pf_run.add_argument("--out", "-o", default=None, help="Write the Output Envelope JSON to this path instead of stdout.")
+    pf_run.set_defaults(func=cmd_profile_run)
+
+    # ---- v1.3 policy subcommand group (additive; FR-02) ----
+    po = sub.add_parser("policy", help="v1.3 Policy operations (validate/list/show).")
+    pos = po.add_subparsers(dest="policy_cmd", required=True)
+    po_validate = pos.add_parser("validate", help="Validate a governance policy JSON.")
+    po_validate.add_argument("--input", "-i", required=True, help="Path to a policy JSON.")
+    po_validate.set_defaults(func=cmd_policy_validate)
+    po_list = pos.add_parser("list", help="Show the default governance policy metadata.")
+    po_list.set_defaults(func=cmd_policy_list)
+    po_show = pos.add_parser("show", help="Show the default governance policy.")
+    po_show.add_argument("--out", "-o", default=None, help="Write the policy JSON to this path instead of stdout.")
+    po_show.set_defaults(func=cmd_policy_show)
     return p
 
 

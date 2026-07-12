@@ -1,0 +1,28 @@
+{
+  "id": "prof_layer_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "LayerProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce layer profile",
+  "status": "active",
+  "domain": {
+    "reference_profiles": [
+      "prof_fshi_ecom_001@1.0.0",
+      "prof_risk_ecom_001@1.0.0",
+      "prof_validation_ecom_001@1.0.0"
+    ],
+    "target_layers": [
+      "L1",
+      "L2",
+      "L3"
+    ]
+  },
+  "digest": "82669b8519f0e073acbe5b1fe1febcac91c86d46f0026165a893aae3aea9080a"
+}

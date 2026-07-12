@@ -32,7 +32,15 @@
       "properties": {
         "dimensions": { "type": "array", "items": { "type": "string" } },
         "values": { "type": "array", "items": { "type": "number" } },
-        "note": { "type": "string" }
+        "note": { "type": "string" },
+        "profile_driven": { "type": "boolean", "description": "v1.3: true when computed from Profiles (vs v1.2 stub)" },
+        "computation": { "type": "string", "description": "v1.3 computation identifier, e.g. profile_driven_v1.3" },
+        "source_profile_versions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "v1.3: id@version list of source profiles; enables v1.4 replay"
+        },
+        "deterministic": { "type": "boolean", "description": "v1.3: true when output is reproducible from (business_data, profile versions)" }
       }
     },
     "ess_candidates": { "type": "array" },
@@ -64,7 +72,58 @@
     },
     "l4_mode": { "type": "string", "enum": ["DISABLED", "LOCAL_SIMULATION", "NETWORK_CANDIDATE"] },
     "external_effect": { "type": "boolean", "const": false },
-    "content_digest": { "type": "string", "minLength": 1 }
+    "content_digest": { "type": "string", "minLength": 1 },
+    "unknown_flags": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["flag"],
+        "properties": {
+          "flag": { "type": "string" },
+          "detail": {}
+        }
+      },
+      "description": "v1.3: explicit UNKNOWN items (from env.unknowns); never silent (FR-06)"
+    },
+    "hard_forbidden": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scenario_id", "condition_id"],
+        "properties": {
+          "scenario_id": { "type": "string" },
+          "scenario_type": { "type": "string" },
+          "condition_id": { "type": "string" },
+          "description": { "type": "string" },
+          "field": { "type": "string" }
+        }
+      },
+      "description": "v1.3: triggered hard-forbidden conditions; explicitly flagged, not masked by aggregate (FR-06)"
+    },
+    "scenario_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "v1.3: scenario profiles referenced by this evaluation"
+    },
+    "eligibility_candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eligibility_candidate", "requirements_satisfied", "external_auth_required", "trust_domain_results"],
+      "properties": {
+        "eligibility_candidate": { "type": "string", "enum": ["CANDIDATE", "NOT_CANDIDATE", "UNKNOWN"] },
+        "requirements_satisfied": { "type": "boolean" },
+        "external_auth_required": { "type": "boolean" },
+        "trust_domain_results": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" },
+          "description": "v1.3: per trust-domain satisfaction; NEVER merged into a single boolean"
+        },
+        "note": { "type": "string" }
+      },
+      "description": "v1.3: local eligibility CANDIDATE state only; never a certification/authorization conclusion"
+    }
   },
   "$defs": {
     "gate_record": {

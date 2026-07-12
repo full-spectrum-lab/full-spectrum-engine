@@ -1,0 +1,24 @@
+{
+  "id": "prof_ess_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "ESSProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce ESS profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "thresholds": {
+        "survival": 0.5,
+        "meaning": 0.5
+      }
+    }
+  },
+  "digest": "b51f059ef0fc7baa42e3ac909a1d5ecc8bd7d5fbbf3b8a4ab4f044d083c84545"
+}

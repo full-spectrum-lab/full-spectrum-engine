@@ -1,0 +1,26 @@
+{
+  "id": "prof_interop_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "InteropProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce interop profile",
+  "status": "active",
+  "domain": {
+    "l4_modes": [
+      "DISABLED",
+      "LOCAL_SIMULATION",
+      "NETWORK_CANDIDATE"
+    ],
+    "protocols": [
+      "l4_candidate"
+    ]
+  },
+  "digest": "e27e8747bbfe7a5a44e45fbf8584254e189ffc749d61f2d06651d4accf27662b"
+}

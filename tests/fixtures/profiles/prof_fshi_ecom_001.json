@@ -1,0 +1,29 @@
+{
+  "id": "prof_fshi_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "FSHIProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce FSHI profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "weights": {
+        "commitment_risk": 0.5,
+        "authority_risk": 0.3,
+        "knowledge_conflict_risk": 0.2
+      }
+    },
+    "target_layers": [
+      "L1",
+      "L2"
+    ]
+  },
+  "digest": "22329deb96a10bdb5dca378a9aeb0d5cbd8ff91e359462d828b5ee53201e4af4"
+}

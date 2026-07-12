@@ -1,0 +1,20 @@
+{
+  "id": "cert_req_sample_notrequired",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "CertificationRequirementProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "sample ALL_OF requirement",
+  "status": "active",
+  "domain": {
+    "logic": "NOT_REQUIRED",
+    "n": 1,
+    "requirements": []
+  }
+}

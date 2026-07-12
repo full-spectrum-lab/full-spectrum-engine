@@ -1,0 +1,22 @@
+{
+  "id": "prof_trust_domain_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "TrustDomainProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce trust domain profile",
+  "status": "active",
+  "domain": {
+    "trust_domains": [
+      "example.enterprise.internal",
+      "external.ca.org"
+    ]
+  },
+  "digest": "fec2cda2f1d7c413da0e6ebd04182a67c63c64a0e4cc1a126e3ba4f40105271c"
+}

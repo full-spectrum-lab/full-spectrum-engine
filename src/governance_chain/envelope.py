@@ -247,6 +247,186 @@ def _stub_risk_vector(business_data):
     }
 
 
+# ----------------------------------------------------------------
+# v1.3 extension helpers (additive; gated so the v1.2 output stays byte-for-byte)
+# ----------------------------------------------------------------
+def _split_profile_ref(ref):
+    """Split a profile/scenario ref ``id`` or ``id@version`` into ``(id, version)``."""
+    ref = str(ref)
+    if "@" in ref:
+        pid, ver = ref.split("@", 1)
+        return pid, ver
+    return ref, None
+
+
+def _expand_profile_set(profiles, reg):
+    """Expand LayerProfile ``reference_profiles`` additively (no averaging).
+
+    A LayerProfile is a combo container; its referenced profiles (and theirs,
+    recursively) are pulled in. Already-seen ids are skipped to avoid cycles.
+    A broken layer reference raises :class:`InputEnvelopeError` (never silent).
+    """
+    seen = set()
+    expanded = []
+    queue = list(profiles)
+    while queue:
+        p = queue.pop()
+        pid = p.get("id")
+        if pid in seen:
+            continue
+        seen.add(pid)
+        expanded.append(p)
+        if p.get("profile_type") == "LayerProfile":
+            for ref in (p.get("domain") or {}).get("reference_profiles", []):
+                rpid, rver = _split_profile_ref(ref)
+                try:
+                    child = reg.get(rpid, rver)
+                except KeyError:
+                    raise InputEnvelopeError(
+                        f"layer reference '{ref}' does not resolve (broken link)")
+                queue.append(child)
+    return expanded
+
+
+def resolve_profiles(refs):
+    """Resolve a list of profile refs to profile dicts.
+
+    Raises :class:`InputEnvelopeError` on any broken link — never silently passes.
+    """
+    from .profiles.registry import get_default_registry
+    reg = get_default_registry()
+    out = []
+    for ref in (refs or []):
+        pid, ver = _split_profile_ref(ref)
+        try:
+            out.append(reg.get(pid, ver))
+        except KeyError:
+            raise InputEnvelopeError(
+                f"profile reference '{ref}' does not resolve (broken link)")
+    return out
+
+
+def resolve_scenarios(refs):
+    """Resolve a list of scenario refs to :class:`ScenarioProfile` objects.
+
+    Raises :class:`InputEnvelopeError` on any broken link.
+    """
+    from .scenario import get_default_registry
+    reg = get_default_registry()
+    out = []
+    for ref in (refs or []):
+        sid, ver = _split_profile_ref(ref)
+        try:
+            out.append(reg.get_scenario(sid, ver))
+        except KeyError:
+            raise InputEnvelopeError(
+                f"scenario reference '{ref}' does not resolve (broken link)")
+    return out
+
+
+def aggregate_explicit(env, scenarios):
+    """Aggregate UNKNOWN flags and hard-forbidden conditions explicitly (FR-06).
+
+    Returns ``(unknown_flags, hard_forbidden, basis_markers)``. UNKNOWN / hard
+    forbidden are NEVER masked by an aggregate score (AC-06).
+    """
+    unknown_flags = []
+    for key, value in (env.get("unknowns", {}) or {}).items():
+        unknown_flags.append({"flag": key, "detail": value})
+
+    hard_forbidden = []
+    for scn in (scenarios or []):
+        hard_forbidden.extend(scn.evaluate(env))
+
+    basis_markers = []
+    if unknown_flags:
+        basis_markers.append("UNKNOWN_PRESENT")
+    if hard_forbidden:
+        basis_markers.append("HARD_FORBIDDEN")
+    return unknown_flags, hard_forbidden, basis_markers
+
+
+def _augment_v13_output(env, output, profile_refs, scenario_refs, cert_refs,
+                        business_data, unknown_count, is_candidate):
+    """Apply the v1.3 Profile / Scenario / Certification extensions to ``output``."""
+    from .risk_vector import RiskVectorComputer
+    from .certification import CertificationEngine
+
+    # 1) Profiles -> Profile-driven risk_vector (replaces the v1.2 stub)
+    if profile_refs:
+        from .profiles.registry import get_default_registry
+        reg = get_default_registry()
+        # Expand LayerProfile reference_profiles (additive; no averaging across
+        # layers — 纵向递归不平均). Broken layer references raise explicitly.
+        profiles = _expand_profile_set(resolve_profiles(profile_refs), reg)
+        by_type = {}
+        for p in profiles:
+            by_type.setdefault(p.get("profile_type"), []).append(p)
+        measurement = (by_type.get("FSHIProfile") or [None])[0] \
+            or (by_type.get("RiskProfile") or [None])[0] or {}
+        fshi = (by_type.get("FSHIProfile") or [None])[0] or {}
+        risk = (by_type.get("RiskProfile") or [None])[0] or {}
+        evaluation = (by_type.get("ValidationProfile") or [None])[0] or {}
+        computer = RiskVectorComputer(measurement, fshi, risk, evaluation)
+        output["risk_vector"] = computer.compute(business_data)
+
+    # 2) Scenarios -> hard-forbidden conditions
+    scenario_ids = []
+    hard_forbidden = []
+    if scenario_refs:
+        scenarios = resolve_scenarios(scenario_refs)
+        for scn in scenarios:
+            scenario_ids.append(scn.obj.get("id"))
+        _, hard_forbidden, _ = aggregate_explicit(env, scenarios)
+
+    # 3) UNKNOWN flags (always surfaced in v1.3 augmented mode; never silent)
+    unknown_flags, _, _ = aggregate_explicit(env, None)
+    if unknown_flags:
+        output["unknown_flags"] = unknown_flags
+
+    # 4) Certification combination (candidate only, never a conclusion)
+    if cert_refs:
+        eng = CertificationEngine()
+        req_profiles = resolve_profiles(cert_refs)
+        attestations = env.get("attestations") or []
+        verification_results = env.get("verification_result_refs") or []
+        eligibility = None
+        for req_obj in req_profiles:
+            eligibility = eng.evaluate(req_obj, attestations, verification_results)
+        if eligibility is not None:
+            output["eligibility_candidate"] = eligibility
+
+    # 5) Attach scenario results
+    if scenario_ids:
+        output["scenario_refs"] = scenario_ids
+        output["hard_forbidden"] = hard_forbidden
+
+    # 6) Human review + explanation basis (explicit; NOT covered by aggregate)
+    hard_present = bool(hard_forbidden)
+    unk_present = bool(unknown_flags)
+    if hard_present or unk_present:
+        output["human_review_recommendation"]["required"] = True
+        reasons = []
+        if unk_present:
+            reasons.append("unknown_evidence")
+        if hard_present:
+            reasons.append("hard_forbidden_condition")
+        output["human_review_recommendation"]["reason"] = "/".join(reasons)
+        basis_markers = list(output["explanation"]["basis"])
+        if unk_present and "UNKNOWN_PRESENT" not in basis_markers:
+            basis_markers.append("UNKNOWN_PRESENT")
+        if hard_present and "HARD_FORBIDDEN" not in basis_markers:
+            basis_markers.append("HARD_FORBIDDEN")
+        output["explanation"]["basis"] = basis_markers
+        if hard_present:
+            output["explanation"]["text"] = (
+                output["explanation"]["text"]
+                + " HARD_FORBIDDEN conditions present and explicitly flagged "
+                  "(not covered by aggregate score)."
+            )
+    return output
+
+
 def run_envelope(env, subject_declaration=None):
     """
     Run the v1.2 Observer over an Input Envelope and produce an Output Envelope.
@@ -325,9 +505,21 @@ def run_envelope(env, subject_declaration=None):
         "gate": gates,
         "l4_mode": l4_mode,
         "external_effect": False,  # v1.2 freeze: candidate != active; always False
-        "content_digest": content_digest(None),  # placeholder; set below
     }
-    # Set the real content digest over the stable part (everything except itself)
+
+    # ---- v1.3 extension (gated on optional refs) -------------------------------
+    # When no profile/scenario/certification refs are present the output is
+    # byte-for-byte identical to v1.2 (zero regression for the 178 tests).
+    profile_refs = env.get("profile_refs") or []
+    scenario_refs = env.get("scenario_refs") or []
+    cert_refs = env.get("certification_requirement_refs") or []
+    if profile_refs or scenario_refs or cert_refs:
+        output = _augment_v13_output(
+            env, output, profile_refs, scenario_refs, cert_refs,
+            business_data, unknown_count, is_candidate,
+        )
+
+    # Final content digest over the stable part (everything except itself).
     stable = {k: v for k, v in output.items() if k != "content_digest"}
     output["content_digest"] = content_digest(stable)
     return output

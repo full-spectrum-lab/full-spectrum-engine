@@ -1,0 +1,24 @@
+{
+  "id": "prof_fshi_logi_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "FSHIProfile",
+  "scope": "internal",
+  "owner": "logistics_cert_node_001",
+  "approved_by": "logistics_quality_supervisor",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial logistics FSHI profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "weights": {
+        "evidence_risk": 0.6,
+        "coordination_risk": 0.4
+      }
+    }
+  },
+  "digest": "128fae4dffd34586e5a85c65b7ef8d0291575bd60485c93735efcf73a7c00b4a"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "prof_validation_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "ValidationProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce validation profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "thresholds": {
+        "commitment_risk": 0.6,
+        "authority_risk": 0.6
+      }
+    }
+  },
+  "digest": "861d58aee8b25bc9c766eae54bea6cceb23fbde4cef4185c7ae156f22ad17e95"
+}

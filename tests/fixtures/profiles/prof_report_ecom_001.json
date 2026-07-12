@@ -1,0 +1,24 @@
+{
+  "id": "prof_report_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "ReportTemplate",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce report template",
+  "status": "active",
+  "domain": {
+    "template_id": "ecom_report_v1",
+    "sections": [
+      "summary",
+      "risks",
+      "review"
+    ]
+  },
+  "digest": "f4931476380bafad63a3d05dcc1c52b802849850adad8d2611d1bbf0d8487be5"
+}

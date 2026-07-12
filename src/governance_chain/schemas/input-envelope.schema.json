@@ -41,6 +41,21 @@
     "credential_refs": { "type": "array", "items": { "type": "string" } },
     "verification_result_refs": { "type": "array", "items": { "type": "string" } },
     "authorization_refs": { "type": "array", "items": { "type": "string" } },
+    "scenario_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "v1.3: Scenario Profile references (Overcommitment/CustomerServiceAudit/KnowledgeConflict). Optional; absent in v1.2."
+    },
+    "certification_requirement_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "v1.3: CertificationRequirementProfile references for local eligibility evaluation. Optional."
+    },
+    "attestations": {
+      "type": "array",
+      "items": { "type": "object" },
+      "description": "v1.3: externally-provided attestations consumed by the CertificationEngine (carried, never forged). Optional."
+    },
     "gate": {
       "type": "object",
       "additionalProperties": false,

@@ -1,0 +1,34 @@
+{
+  "id": "scn_knowledge_conflict_001",
+  "version": "1.0.0",
+  "schema_version": "scenario-1.0",
+  "scenario_type": "KnowledgeConflict",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial knowledge conflict scenario",
+  "status": "active",
+  "domain": {
+    "description": "知识冲突：权威知识源冲突未解决即选定答案",
+    "triggers": [
+      {
+        "event": "recommendation",
+        "condition": "conflict_resolved == false"
+      }
+    ],
+    "hard_forbidden_conditions": [
+      {
+        "id": "knowledge_source_conflict_unresolved",
+        "description": "权威知识源冲突未解决即选定答案",
+        "field": "business_data.conflict_resolved",
+        "op": "equals",
+        "value": false
+      }
+    ]
+  },
+  "digest": "0a51c05a8b1ec4476cbbbfaf92cd37b34c9a4dcedf5070511a6d4da234a39881"
+}

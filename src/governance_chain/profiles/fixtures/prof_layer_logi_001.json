@@ -1,0 +1,26 @@
+{
+  "id": "prof_layer_logi_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "LayerProfile",
+  "scope": "internal",
+  "owner": "logistics_cert_node_001",
+  "approved_by": "logistics_quality_supervisor",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial logistics layer profile",
+  "status": "active",
+  "domain": {
+    "reference_profiles": [
+      "prof_fshi_logi_001@1.0.0",
+      "prof_risk_logi_001@1.0.0"
+    ],
+    "target_layers": [
+      "L1",
+      "L2"
+    ]
+  },
+  "digest": "ff5156190a9434b17f1c34ae9ecee33192c47fa12af55b1e99aa2adf1c5e7e27"
+}

@@ -94,6 +94,32 @@ class EnvelopeRequest(BaseModel):
     )
 
 
+class ProfileLoadRequest(BaseModel):
+    """
+    POST /api/v1/profile/load request body (v1.3 Profile load, additive endpoint).
+
+    The body is a single Profile JSON conforming to profile.schema.json. No
+    authentication is added (local / offline posture, consistent with v1.2).
+    """
+    profile: Dict[str, Any] = Field(
+        ...,
+        description="A Profile JSON conforming to profile.schema.json (13 profile_type values)."
+    )
+
+
+class PolicyLoadRequest(BaseModel):
+    """
+    POST /api/v1/policy/load request body (v1.3 Policy load, additive endpoint).
+
+    The body is a governance policy JSON. It is validated but never executed by
+    the Observer (first-gen only compatible, not forge).
+    """
+    policy: Dict[str, Any] = Field(
+        ...,
+        description="A governance policy JSON (policy_id/version/source/approved_by/change_log/rules/default)."
+    )
+
+
 class RunestoneRequest(BaseModel):
     """
     POST /api/v1/runestone request body

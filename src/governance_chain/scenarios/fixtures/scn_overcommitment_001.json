@@ -1,0 +1,34 @@
+{
+  "id": "scn_overcommitment_001",
+  "version": "1.0.0",
+  "schema_version": "scenario-1.0",
+  "scenario_type": "Overcommitment",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial overcommitment scenario",
+  "status": "active",
+  "domain": {
+    "description": "越权承诺：在无已确认权限时作出超出权限的承诺",
+    "triggers": [
+      {
+        "event": "commitment",
+        "condition": "refund_authority == false"
+      }
+    ],
+    "hard_forbidden_conditions": [
+      {
+        "id": "overcommitment_without_authority",
+        "description": "在无已确认退款权限时承诺全额退款",
+        "field": "business_data.refund_authority",
+        "op": "equals",
+        "value": false
+      }
+    ]
+  },
+  "digest": "4220a529791b4f643540dd50addc8abe194fe8acd5b3da2288b28ffbe397ed31"
+}

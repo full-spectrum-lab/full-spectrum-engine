@@ -1,0 +1,22 @@
+{
+  "id": "prof_aggregation_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "AggregationProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce aggregation profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "method": "no_average",
+      "note": "纵向递归不平均"
+    }
+  },
+  "digest": "82e68640cf2a205fc367faec501bb89d2cd79b9683796d235c4c1a9526f9010b"
+}

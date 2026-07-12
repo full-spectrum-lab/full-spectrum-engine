@@ -1,0 +1,24 @@
+{
+  "id": "prof_human_review_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "HumanReviewProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce human review profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "trigger_conditions": [
+        "unknown_evidence",
+        "hard_forbidden_condition"
+      ]
+    }
+  },
+  "digest": "a8ffeea18e74711cf2cd1c699efce193ec491c7620f882793d40cdac054b47ce"
+}

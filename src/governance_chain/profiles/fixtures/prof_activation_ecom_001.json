@@ -1,0 +1,20 @@
+{
+  "id": "prof_activation_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "ActivationProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce activation profile",
+  "status": "active",
+  "domain": {
+    "lifecycle_status": "active",
+    "exit_policy": "graceful_shutdown_with_audit_snapshot"
+  },
+  "digest": "9f84b560aeb680652ed1c8e8cf92e23531f622fe944a6ac00c4086c9553bac42"
+}

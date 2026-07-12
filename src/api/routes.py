@@ -37,7 +37,7 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
-from .models import EvaluateRequest, RunestoneRequest, HealthResponse, EnvelopeRequest
+from .models import EvaluateRequest, RunestoneRequest, HealthResponse, EnvelopeRequest, ProfileLoadRequest, PolicyLoadRequest
 from .registry import get_registry
 from src.governance_chain import envelope as envelope_mod
 
@@ -49,6 +49,8 @@ if _PROJECT_ROOT not in sys.path:
 from simulate import run_simulation  # noqa: E402
 from src.bridge.runestone import Runestone, RiskVector, ReasonField  # noqa: E402
 from src.subject import normalize_declaration, subject_ref, SubjectDeclarationError  # noqa: E402
+from src.governance_chain.profiles.registry import get_default_registry as get_profile_registry  # noqa: E402
+from src.governance_chain.registry import ProfileIntegrityError  # noqa: E402
 
 router = APIRouter(prefix="/api/v1", tags=["v1.2.0"])
 
@@ -733,3 +735,72 @@ async def envelope_run(req: EnvelopeRequest, response: Response):
             },
         )
     return out
+
+
+# ============================================================
+# v1.3 additive endpoints (Profile / Policy load) — NOT FOR PRODUCTION / local only
+# ============================================================
+
+@router.post("/profile/load")
+async def profile_load(req: ProfileLoadRequest, response: Response):
+    """
+    v1.3 additive endpoint: validate + ingest a Profile into the shared registry.
+
+    No authentication is added (consistent with the v1.2 local / offline posture).
+    Returns the resolved ``id@version`` key plus the recomputed digest.
+    """
+    _set_metadata_headers(response)
+    reg = get_profile_registry()
+    try:
+        key = reg.ingest(req.profile)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": str(exc), "error_code": "PROFILE_INVALID"},
+        )
+    except ProfileIntegrityError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": str(exc), "error_code": "PROFILE_INTEGRITY"},
+        )
+    return {
+        "key": key,
+        "profile_id": req.profile.get("id"),
+        "version": req.profile.get("version"),
+    }
+
+
+@router.get("/profile/{profile_id}")
+async def profile_get(profile_id: str, response: Response, version: Optional[str] = None):
+    """
+    v1.3 additive endpoint: fetch a Profile by id (optionally pinned version).
+    """
+    _set_metadata_headers(response)
+    reg = get_profile_registry()
+    try:
+        obj = reg.get(profile_id, version)
+    except KeyError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"message": f"profile {profile_id} not found", "error_code": "NOT_FOUND"},
+        )
+    return obj
+
+
+@router.post("/policy/load")
+async def policy_load(req: PolicyLoadRequest, response: Response):
+    """
+    v1.3 additive endpoint: validate a governance policy dict (never executed).
+
+    The Observer only COMPATIBLES with, never FORGES, auth; a policy is validated
+    for schema completeness but is not run by the first-generation engine.
+    """
+    _set_metadata_headers(response)
+    policy = req.policy
+    for field in ("policy_id", "version", "source", "approved_by", "change_log", "rules", "default"):
+        if field not in policy:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={"message": f"policy missing required field: {field}", "error_code": "POLICY_INVALID"},
+            )
+    return {"policy_id": policy.get("policy_id"), "version": policy.get("version")}

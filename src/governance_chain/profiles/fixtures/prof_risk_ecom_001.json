@@ -1,0 +1,25 @@
+{
+  "id": "prof_risk_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "RiskProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce risk profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "weights": {
+        "authority_risk": 0.4,
+        "evidence_gap_risk": 0.3,
+        "coordination_risk": 0.3
+      }
+    }
+  },
+  "digest": "cbec8943c6992cc77f0a1d0a38911a3ffa053bb251a8cb5ce780ce093f315d77"
+}

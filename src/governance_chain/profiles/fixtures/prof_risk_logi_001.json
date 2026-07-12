@@ -1,0 +1,24 @@
+{
+  "id": "prof_risk_logi_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "RiskProfile",
+  "scope": "internal",
+  "owner": "logistics_cert_node_001",
+  "approved_by": "logistics_quality_supervisor",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial logistics risk profile",
+  "status": "active",
+  "domain": {
+    "parameters": {
+      "weights": {
+        "evidence_risk": 0.5,
+        "coordination_risk": 0.5
+      }
+    }
+  },
+  "digest": "380d181a48943b4cdad24f27eb7f17bf01ab72773c7cb0957a1851ee3b0b5675"
+}

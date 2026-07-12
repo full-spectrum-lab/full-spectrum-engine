@@ -1,0 +1,25 @@
+{
+  "id": "prof_auth_gate_ecom_001",
+  "version": "1.0.0",
+  "schema_version": "profile-1.0",
+  "profile_type": "AuthorizationGateProfile",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial ecommerce auth gate profile",
+  "status": "active",
+  "domain": {
+    "local_conditions": [
+      {
+        "gate": "qualification",
+        "required": true
+      }
+    ],
+    "note": "仅本地资格条件，不执行"
+  },
+  "digest": "8c654ea09fdda6c827b70faa23e608690314ef0bae04f482b39001693d2edb61"
+}

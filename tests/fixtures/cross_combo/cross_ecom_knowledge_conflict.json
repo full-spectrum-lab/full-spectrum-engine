@@ -1,0 +1,39 @@
+{
+  "schema_id": "gie-1.2",
+  "schema_version": "gie-1.2",
+  "contract_version": "1.2.0",
+  "layer": "L1",
+  "scope": "internal",
+  "subject_refs": ["subj_ecom_001"],
+  "relationship_refs": [],
+  "business_data": {
+    "industry": "ecommerce_customer_service",
+    "scenario": "knowledge_conflict",
+    "conflict_resolved": false
+  },
+  "evidence_refs": [],
+  "known_facts": {},
+  "unknowns": {},
+  "profile_refs": ["prof_layer_ecom_001@1.0.0"],
+  "scenario_refs": ["scn_knowledge_conflict_001@1.0.0"],
+  "certification_requirement_refs": ["prof_cert_req_ecom_001@1.0.0"],
+  "attestations": [
+    {"issuer": "enterprise_cert_node_001", "scope": "enterprise_private", "trust_domain": "example.enterprise.internal", "valid_from": "2026-01-01", "valid_until": "2027-12-31", "revoked": false},
+    {"issuer": "external_ca", "scope": "external", "trust_domain": "external.ca.org", "valid_from": "2026-01-01", "valid_until": "2027-12-31", "revoked": false}
+  ],
+  "knowledge_source_refs": [],
+  "credential_refs": [],
+  "verification_result_refs": [],
+  "authorization_refs": [],
+  "gate": {
+    "layer_flow": { "state": "INTERNAL_OPEN_EXTERNAL_CLOSED", "reason_code": "INTERNAL_OPEN_EXTERNAL_CLOSED" },
+    "qualification": { "state": "INTERNAL_OPEN_EXTERNAL_CLOSED", "reason_code": "INTERNAL_OPEN_EXTERNAL_CLOSED" },
+    "authorization": { "state": "CLOSED", "reason_code": "EXTERNAL_CLOSED_BY_DEFAULT" },
+    "mutual_auth": { "state": "CLOSED", "reason_code": "EXTERNAL_CLOSED_BY_DEFAULT" },
+    "effective_state": "INTERNAL_ONLY"
+  },
+  "l4_mode": "DISABLED",
+  "l4_refs": {},
+  "context_metadata": { "combo": "ecommerce x knowledge_conflict" },
+  "audit_metadata": { "operator": "workbuddy" }
+}

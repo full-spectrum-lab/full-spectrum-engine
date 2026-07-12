@@ -1,0 +1,34 @@
+{
+  "id": "scn_customer_service_audit_001",
+  "version": "1.0.0",
+  "schema_version": "scenario-1.0",
+  "scenario_type": "CustomerServiceAudit",
+  "scope": "internal",
+  "owner": "enterprise_cert_node_001",
+  "approved_by": "knowledge_governance_owner",
+  "approval_status": "approved",
+  "effective_from": "2026-01-01",
+  "effective_until": "2027-12-31",
+  "supersedes": [],
+  "change_reason": "initial customer service audit scenario",
+  "status": "active",
+  "domain": {
+    "description": "客服审计：未完成人工复核即给出确定性承诺",
+    "triggers": [
+      {
+        "event": "commitment",
+        "condition": "human_review_completed == false"
+      }
+    ],
+    "hard_forbidden_conditions": [
+      {
+        "id": "cs_audit_without_human_review",
+        "description": "未完成人工复核即给出确定性承诺",
+        "field": "business_data.human_review_completed",
+        "op": "equals",
+        "value": false
+      }
+    ]
+  },
+  "digest": "cae2eed98367fd73e69a0ed8f91a20d63f3b74a6915be556c2966d8a8aacb32e"
+}

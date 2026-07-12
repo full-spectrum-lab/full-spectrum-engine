@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/full-spectrum-lab/full-spectrum-protocol/schemas/profile.schema.json",
+  "title": "GovernanceProfile",
+  "description": "v1.3 通用 Profile Schema。profile_type 枚举 13 类（SRS §3.1）：LayerProfile / FSHIProfile / RiskProfile / ESSProfile / ValidationProfile / HumanReviewProfile / AggregationProfile / ReportTemplate / TrustDomainProfile / InteropProfile / CertificationRequirementProfile / AuthorizationGateProfile / ActivationProfile。顶层 additionalProperties:false（反模式红线）；domain 为各 Profile 领域字段容器（开放，因其内容随 profile_type 变化）。每个 Profile 含版本、Schema、类型、scope、owner、审批、有效期、supersedes、变更原因、digest 与 status（SRS §3.3 / 第三轮评审冻结修订）。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "schema_version",
+    "profile_type",
+    "scope",
+    "owner",
+    "approved_by",
+    "approval_status",
+    "effective_from",
+    "effective_until",
+    "supersedes",
+    "change_reason",
+    "digest",
+    "status"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "schema_version": { "type": "string", "minLength": 1 },
+    "profile_type": {
+      "type": "string",
+      "enum": [
+        "LayerProfile",
+        "FSHIProfile",
+        "RiskProfile",
+        "ESSProfile",
+        "ValidationProfile",
+        "HumanReviewProfile",
+        "AggregationProfile",
+        "ReportTemplate",
+        "TrustDomainProfile",
+        "InteropProfile",
+        "CertificationRequirementProfile",
+        "AuthorizationGateProfile",
+        "ActivationProfile"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["internal", "external_candidate", "enterprise"]
+    },
+    "owner": { "type": "string", "minLength": 1 },
+    "approved_by": { "type": "string", "minLength": 1 },
+    "approval_status": {
+      "type": "string",
+      "enum": ["draft", "approved", "deprecated"]
+    },
+    "effective_from": { "type": "string", "minLength": 1 },
+    "effective_until": { "type": "string", "minLength": 1 },
+    "supersedes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "change_reason": { "type": "string" },
+    "digest": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["active", "inactive", "retired"]
+    },
+    "domain": {
+      "type": "object",
+      "description": "领域字段容器；随 profile_type 变化，故开放。常见字段：parameters（weights/thresholds/method）、reference_profiles、target_layers、trust_domains、logic、requirements 等。"
+    }
+  }
+}
