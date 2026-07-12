@@ -8,8 +8,9 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-green)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/Status-v1.0.0-stable_local--first-success)](#)
 [![Tests](https://img.shields.io/badge/Tests-141%20passed-brightgreen)](#)
+[![CI](https://github.com/full-spectrum-lab/full-spectrum-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/full-spectrum-lab/full-spectrum-engine/actions/workflows/ci.yml)
 
-Full Spectrum Engine is the runnable engine layer in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, local audit records, and optional ESS-lite path suggestions.
+Full Spectrum Engine is the runnable first-generation **Observer Engine** in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, local audit records, and optional ESS-lite path suggestions.
 
 This repository is for **local internal validation first**:
 
@@ -23,7 +24,7 @@ It does **not** upload enterprise data by default, does **not** execute final bu
 
 ## 中文一句话
 
-这是全频谱体系里的“企业内部引擎层” v1.0：先让单个主体在本地边界内看见风险、留下审计记录、完成可复现验证，再决定是否进入更重的细胞协议层或协议网络层。
+这是全频谱体系里的第一代本地观察者引擎 v1.0：企业使用自己的数据和可选的本地主体声明，完成分析、风险预警、报告与审计留痕。它不要求加入社区、公共 DID、认证网络或协议网络，也不执行最终业务动作。
 
 ---
 
@@ -79,14 +80,21 @@ If you want the fastest possible overview before reading code, start here:
 | --- | --- |
 | [`full-spectrum-protocol`](https://github.com/full-spectrum-lab/full-spectrum-protocol) | Public protocol specification, RFCs, schemas, mappings, and examples |
 | [`full-spectrum-engine`](https://github.com/full-spectrum-lab/full-spectrum-engine) | Runnable local-first engine (this repository) |
-| [`full-spectrum-enterprise-governance`](https://github.com/full-spectrum-lab/full-spectrum-enterprise-governance) | Enterprise deployment package, industry adapters, dashboards, and internal governance workflows |
+| [`full-spectrum-enterprise-governance`](https://github.com/full-spectrum-lab/full-spectrum-enterprise-governance) | Enterprise cases, Profiles, adapters, human-review workflows, and deployment guidance |
 | [`full-spectrum-commons`](https://github.com/full-spectrum-lab/full-spectrum-commons) | Shared diagrams, ecosystem descriptions, and public-facing common materials |
 
-A practical adoption path is:
+A practical observer-first adoption path is:
 
 1. run the **engine layer** locally inside one organization
-2. add **cell protocol declarations** when identity, permission, and responsibility need to be formalized
-3. add the **protocol network layer** only when multiple subjects need cross-node audit or coordination
+2. add an optional enterprise-local subject declaration when attribution matters
+3. stabilize I/O, Profile, replay, and audit contracts
+4. add certified identity or protocol-network interoperability only when cross-organization use requires it
+
+## Evidence and research
+
+- [Evidence and Project Status](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/docs/evidence-and-status.md)
+- [WP-001: Governance Semantics and a Local-First Observer Engine](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/research/working-papers/wp-001-governance-semantics-and-local-observer-engine.md) — working paper, not peer reviewed
+- [Legacy Manuscript Editorial Review](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/research/working-papers/legacy-manuscript-review.md)
 
 ---
 
