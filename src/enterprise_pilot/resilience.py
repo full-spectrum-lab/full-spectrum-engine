@@ -62,15 +62,17 @@ class Timeout:
         self.seconds = seconds
 
     def run(self, fn, *args, **kwargs):
-        with ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(fn, *args, **kwargs)
-            try:
-                return future.result(timeout=self.seconds)
-            except TimeoutError:
-                future.cancel()
-                raise TimeoutErrorR(f"operation exceeded {self.seconds}s")
-            except Exception as exc:  # noqa: BLE001
-                raise exc
+        executor = ThreadPoolExecutor(max_workers=1)
+        future = executor.submit(fn, *args, **kwargs)
+        try:
+            return future.result(timeout=self.seconds)
+        except TimeoutError:
+            # Executor context-manager exit waits for running work.  That made
+            # a nominal timeout block until the slow operation completed.
+            future.cancel()
+            raise TimeoutErrorR(f"operation exceeded {self.seconds}s")
+        finally:
+            executor.shutdown(wait=False, cancel_futures=True)
 
 
 def with_retry(fn, policy, *args, **kwargs):

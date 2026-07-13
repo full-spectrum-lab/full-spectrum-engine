@@ -43,6 +43,7 @@ from .desensitize import (
 from .review import (
     ReviewRecord,
     ReviewStore,
+    ReviewBindingError,
     record_review,
     verify_review_bindings,
 )
@@ -50,6 +51,7 @@ from .resilience import (
     IdempotencyKey,
     RetryPolicy,
     Timeout,
+    TimeoutErrorR,
     with_retry,
     with_timeout,
     run_resilient,
@@ -92,8 +94,8 @@ __all__ = [
     "SubjectAsPrincipalError", "AuthorizationError", "AuthenticationError",
     "Desensitizer", "MappingRecord", "apply_desensitization", "classify",
     "mask", "hash_value", "tokenize",
-    "ReviewRecord", "ReviewStore", "record_review", "verify_review_bindings",
-    "IdempotencyKey", "RetryPolicy", "Timeout", "with_retry", "with_timeout",
+    "ReviewRecord", "ReviewStore", "ReviewBindingError", "record_review", "verify_review_bindings",
+    "IdempotencyKey", "RetryPolicy", "Timeout", "TimeoutErrorR", "with_retry", "with_timeout",
     "run_resilient",
     "StructuredLogger", "HealthCheck", "Metrics", "health", "metrics_snapshot",
     "BackupManager", "Rollback", "backup", "restore",

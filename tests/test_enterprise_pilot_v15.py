@@ -44,6 +44,7 @@ from src.enterprise_pilot import (  # noqa: E402
     IdempotencyKey,
     RetryPolicy,
     Timeout,
+    TimeoutErrorR,
     with_retry,
     with_timeout,
     run_resilient,
@@ -356,8 +357,14 @@ class TestResilience(unittest.TestCase):
 
     def test_timeout_raises_on_slow_fn(self):
         import time
-        with self.assertRaises(Exception):
+        started = time.monotonic()
+        with self.assertRaises(TimeoutErrorR):
             with_timeout(time.sleep, Timeout(seconds=0.2), 1.0)
+        self.assertLess(
+            time.monotonic() - started,
+            0.75,
+            "timeout must return near its deadline instead of waiting for the worker",
+        )
 
     def test_run_resilient_rolls_back_on_failure(self):
         state = {"value": 0}
