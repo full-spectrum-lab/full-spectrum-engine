@@ -2,7 +2,7 @@
   "schema_version": "goe-0.1",
   "engine_result": {
     "engine": "full-spectrum-engine",
-    "version": "v1.1.0",
+    "version": "v1.2.0",
     "run_id": "run_knowledge_001"
   },
   "risk_vector": {

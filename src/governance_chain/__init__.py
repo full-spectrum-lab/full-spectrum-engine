@@ -16,4 +16,4 @@ from .adapters import get_adapter, EcommerceAdapter
 from . import validator
 
 __all__ = ["build_chain", "write_chain", "get_adapter", "EcommerceAdapter", "validator"]
-__version__ = "1.1.0"
+__version__ = "1.2.0"

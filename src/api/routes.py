@@ -50,11 +50,11 @@ from simulate import run_simulation  # noqa: E402
 from src.bridge.runestone import Runestone, RiskVector, ReasonField  # noqa: E402
 from src.subject import normalize_declaration, subject_ref, SubjectDeclarationError  # noqa: E402
 
-router = APIRouter(prefix="/api/v1", tags=["v1.1.0"])
+router = APIRouter(prefix="/api/v1", tags=["v1.2.0"])
 
 # API version identifiers
-API_VERSION = "1.1.0"
-ENGINE_VERSION = "1.1.0"
+API_VERSION = "1.2.0"
+ENGINE_VERSION = "1.2.0"
 
 # Required risk vector fields (must match RiskVector.to_dict())
 # Note: the field name "reversibility" is retained for protocol compatibility,
