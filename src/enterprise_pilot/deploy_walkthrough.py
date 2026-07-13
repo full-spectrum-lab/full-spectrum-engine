@@ -5,7 +5,7 @@ C-09 非作者部署走查（FR-09 / C-09）。
 设计（共享知识 §8 衍生）：
   * 由**非代码作者方**执行，校验「单新目录 + 受控扩展点」的部署完整性与独立性。
   * 完整性：v1.5 全部模块文件 + 6 个 schema 齐备，schema 须 additionalProperties:false。
-  * 独立性（零侵入）：受保护核心目录（v1.2 基线 86b9f0a）相对 HEAD 字节级未变
+  * 独立性（零侵入）：受保护核心目录（v1.2.0 标签）相对 HEAD 字节级未变
     （git diff 为空）；git 不可用时退化为编译/导入检查。
 
 标准库实现（subprocess / json / os），无新第三方依赖。
@@ -18,7 +18,7 @@ from src.governance_chain import validator
 
 PILOT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(PILOT_DIR))
-BASE_COMMIT = "86b9f0a"
+BASE_COMMIT = "v1.2.0"
 PROTECTED_MODULES = [
     "src/core", "src/engine", "src/storage", "src/bridge",
     "src/guardian", "src/governance", "src/observation", "src/safety",

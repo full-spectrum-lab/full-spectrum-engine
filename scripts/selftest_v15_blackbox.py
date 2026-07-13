@@ -17,7 +17,7 @@ BB 映射（与任务派发 / 架构设计.md §6.2 对齐）：
     BB-06  健康检查 / 指标（C-06）
     BB-07  备份 → 回滚演练：数据连续（C-07）
     BB-08  Connector 默认 OFF：emit 不写回（C-08 / 红线 #3）
-    BB-09  零侵入：git diff 86b9f0a -- 受保护 9 目录 为空
+    BB-09  零侵入：git diff v1.2.0 -- 受保护 9 目录 为空
     BB-10  九条反模式 grep 全绿（§10）
     BB-11  与 v1.4 衔接：import v1.4 模块、replay_ref 复用无回归
 
@@ -38,7 +38,7 @@ import tempfile
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-BASE_COMMIT = "86b9f0a"
+BASE_COMMIT = "v1.2.0"
 CORE_MODULES = [
     "src/core", "src/engine", "src/storage", "src/bridge",
     "src/guardian", "src/governance", "src/observation", "src/safety",
@@ -356,7 +356,7 @@ def bb08_connector_default_off():
 
 
 def bb09_zero_intrusion():
-    """BB-09: 零侵入 — 受保护核心目录相对 86b9f0a 的 diff 为空。"""
+    """BB-09: 零侵入 — 受保护核心目录相对可移植 v1.2.0 标签的 diff 为空。"""
     proc = subprocess.run(
         ["git", "-C", REPO_ROOT, "diff", BASE_COMMIT, "--"] + CORE_MODULES,
         cwd=REPO_ROOT, capture_output=True, text=True,

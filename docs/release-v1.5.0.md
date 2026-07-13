@@ -10,7 +10,7 @@ v1.5.0 adds a bounded enterprise-pilot layer without changing the nine protected
 - v1.5 black box: 13/13;
 - v1.4 regression black box: 9/9;
 - independent red-line verification: 9/9;
-- protected-core diff against `86b9f0a`: 0 bytes;
+- protected-core diff against portable tag `v1.2.0`: 0 bytes;
 - public pilot CLI smoke: `auth roles` and `connector list` passed after fixing missing facade exports;
 - timeout fault injection proves that a 0.2 s deadline returns before 0.75 s for a 1 s worker.
 
