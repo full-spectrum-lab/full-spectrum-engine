@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EnterprisePilotDesensitizePolicy",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "field_categories": {"type": "object"},
+    "methods": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "direct": {"type": "string", "enum": ["hash", "tokenize"]},
+        "indirect": {"type": "string", "enum": ["mask"]},
+        "business": {"type": "string", "enum": ["none", "minimize"]}
+      }
+    },
+    "reversible": {"type": "object"},
+    "minimize": {"type": "boolean"}
+  },
+  "required": ["methods"]
+}

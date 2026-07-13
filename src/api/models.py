@@ -309,3 +309,60 @@ class DeleteDataResponse(BaseModel):
     """Data cleanup response"""
     deleted_decisions: int
     deleted_runestones: int
+
+
+# ============================================================
+# v1.5 enterprise_pilot additive request models
+# ============================================================
+
+class PilotAuthVerifyRequest(BaseModel):
+    """
+    POST /api/v1/pilot/auth/verify request body (v1.5, additive endpoint).
+
+    The Bearer token is carried in the ``Authorization`` header; the body is
+    optional. Authentication uses a pre-shared reference token (not a
+    cryptographic identity proof) — first-gen only compatible, not forge.
+    """
+    token: str = Field(
+        default="",
+        description="Optional; primary token source is the Authorization: Bearer header.",
+    )
+
+
+class PilotReviewRequest(BaseModel):
+    """
+    POST /api/v1/pilot/review request body (v1.5, additive endpoint).
+
+    Records a human review bound to a **real** EvaluationEvent (red-line #8):
+    ``event_id`` / ``event_digest`` / ``bundle_ref`` must resolve in the v1.4 store.
+    """
+    event_id: str = Field(..., description="Real EvaluationEvent id to bind.")
+    event_digest: str = Field(..., description="event_hash of the bound event.")
+    bundle_ref: Optional[str] = Field(default=None, description="Optional replay bundle ref.")
+    action: str = Field(default="approve", description="approve / reject / comment.")
+    reviewer_principal_id: str = Field(..., description="Reviewer principal id (not ObservedSubject).")
+    comment: Optional[str] = Field(default=None)
+    idempotency_key: Optional[str] = Field(default=None)
+
+
+class PilotConnectorExportRequest(BaseModel):
+    """
+    POST /api/v1/pilot/connector/export request body (v1.5, additive endpoint).
+
+    Returns the four-contract output shape; business write-back stays OFF.
+    """
+    name: str = Field(..., description="Connector name.")
+    kind: str = Field(
+        ...,
+        description="report_export | warning_event | review_recommendation | audit_export.",
+    )
+    payload: Dict[str, Any] = Field(default_factory=dict, description="Contract payload.")
+
+
+class PilotDeployWalkthroughRequest(BaseModel):
+    """
+    POST /api/v1/pilot/deploy/walkthrough request body (v1.5, additive endpoint).
+
+    Runs the non-author deploy walkthrough (independence / completeness).
+    """
+    repo_root: Optional[str] = Field(default=None, description="Repo root (defaults to CWD).")

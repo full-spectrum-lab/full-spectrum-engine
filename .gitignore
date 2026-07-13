@@ -22,3 +22,6 @@ src/governance_chain/store/*.sqlite
 
 # governance-chain CLI generated output
 out/
+
+# v1.5 isolated venv (do not commit)
+.venv3p/

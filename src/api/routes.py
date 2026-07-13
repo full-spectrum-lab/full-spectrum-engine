@@ -59,6 +59,10 @@ from .models import (
     ReplayRequest,
     AuditExportRequest,
     AuditVerifyRequest,
+    PilotAuthVerifyRequest,
+    PilotReviewRequest,
+    PilotConnectorExportRequest,
+    PilotDeployWalkthroughRequest,
 )
 from .registry import get_registry
 from src.governance_chain import envelope as envelope_mod
@@ -1038,3 +1042,151 @@ async def audit_verify(response: Response):
         "tampered": tampered,
         "count": store.count(),
     }
+
+
+# ============================================================
+# v1.5 enterprise_pilot additive endpoints (auth-gated)
+# ============================================================
+#
+# These six endpoints are purely ADDITIVE and auth-gated via RBAC (Operator /
+# Service Principal only). They reuse the exact same facade functions the CLI
+# and the v1.5 unit suite use (record_review / run_walkthrough / ConnectorContract
+# / health / metrics_snapshot), so REST == CLI == unit. No pre-v1.5 endpoint,
+# model, or behaviour is modified (red-line: v1.4 black-box 9/9 must stay green).
+#
+# Auth gate (closed decision #7): only the NEW v1.5 endpoints require a Bearer
+# token. v1.4 endpoints are intentionally left ungated to preserve their
+# no-auth black-box contract.
+
+_PILOT_RBAC = None
+
+
+def _get_pilot_rbac():
+    """Lazily build the v1.5 RBAC engine (module-level singleton)."""
+    global _PILOT_RBAC
+    if _PILOT_RBAC is None:
+        from src.enterprise_pilot import RbacEngine, TokenRegistry
+
+        _PILOT_RBAC = RbacEngine(TokenRegistry())
+    return _PILOT_RBAC
+
+
+def _pilot_authenticate(request: Request):
+    """Extract Bearer token, authenticate via _PILOT_RBAC. 401 on failure."""
+    from src.enterprise_pilot import AuthorizationError, SubjectAsPrincipalError
+
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"message": "missing bearer token", "error_code": "UNAUTHENTICATED"},
+        )
+    token = auth[len("Bearer "):].strip()
+    rbac = _get_pilot_rbac()
+    try:
+        principal = rbac.authenticate(token)
+    except (AuthorizationError, SubjectAsPrincipalError):
+        # SubjectAsPrincipalError == using an ObservedSubject as identity (AC-06)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={"message": "authentication failed (unknown token or subject used as identity)",
+                    "error_code": "UNAUTHENTICATED"},
+        )
+    return principal
+
+
+def _pilot_require(principal, action: str):
+    rbac = _get_pilot_rbac()
+    if not rbac.authorize(principal, action):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"message": f"not authorized for '{action}'", "error_code": "FORBIDDEN"},
+        )
+
+
+@router.post("/pilot/auth/verify")
+async def pilot_auth_verify(request: Request, response: Response,
+                             req: PilotAuthVerifyRequest):
+    """v1.5: authenticate a pre-shared reference token; return principal + perms."""
+    _set_metadata_headers(response)
+    principal = _pilot_authenticate(request)
+    return {
+        "authenticated": True,
+        "principal_id": principal.principal_id,
+        "kind": principal.kind,
+        "roles": principal.role_names(),
+        "permissions": sorted(principal.permissions()),
+    }
+
+
+@router.post("/pilot/review")
+async def pilot_review(request: Request, response: Response, req: PilotReviewRequest):
+    """v1.5: record a human review bound to a real EvaluationEvent (red-line #8)."""
+    _set_metadata_headers(response)
+    principal = _pilot_authenticate(request)
+    _pilot_require(principal, "review:write")
+    from src.enterprise_pilot import record_review
+
+    event_ref = {
+        "event_id": req.event_id,
+        "event_digest": req.event_digest,
+        "bundle_ref": req.bundle_ref,
+    }
+    try:
+        rec = record_review(
+            event_ref, req.action, req.reviewer_principal_id,
+            comment=req.comment, idempotency_key=req.idempotency_key,
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"message": str(exc), "error_code": "REVIEW_ERROR"},
+        )
+    return rec
+
+
+@router.get("/pilot/health")
+async def pilot_health(request: Request, response: Response):
+    """v1.5: enterprise_pilot health probe (requires metrics:read)."""
+    _set_metadata_headers(response)
+    principal = _pilot_authenticate(request)
+    _pilot_require(principal, "metrics:read")
+    from src.enterprise_pilot import health
+
+    return health({"principal": principal.principal_id})
+
+
+@router.get("/pilot/metrics")
+async def pilot_metrics(request: Request, response: Response):
+    """v1.5: metrics snapshot (requires metrics:read)."""
+    _set_metadata_headers(response)
+    principal = _pilot_authenticate(request)
+    _pilot_require(principal, "metrics:read")
+    from src.enterprise_pilot import metrics_snapshot
+
+    return metrics_snapshot()
+
+
+@router.post("/pilot/connector/export")
+async def pilot_connector_export(request: Request, response: Response,
+                                 req: PilotConnectorExportRequest):
+    """v1.5: return a connector contract payload; business write-back stays OFF."""
+    _set_metadata_headers(response)
+    principal = _pilot_authenticate(request)
+    _pilot_require(principal, "audit:read")
+    from src.enterprise_pilot import ConnectorContract, emit_contract
+
+    contract = ConnectorContract(req.name, write_enabled=False)
+    return emit_contract(contract, req.kind, req.payload)
+
+
+@router.post("/pilot/deploy/walkthrough")
+async def pilot_deploy_walkthrough(request: Request, response: Response,
+                                   req: PilotDeployWalkthroughRequest):
+    """v1.5: non-author deploy walkthrough (requires deploy:read)."""
+    _set_metadata_headers(response)
+    principal = _pilot_authenticate(request)
+    _pilot_require(principal, "deploy:read")
+    from src.enterprise_pilot import run_walkthrough
+
+    return run_walkthrough(req.repo_root).to_dict()

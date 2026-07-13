@@ -1,0 +1,15 @@
+{
+  "declaration_id": "decl_demo_001",
+  "schema_version": "sd-1.1",
+  "mode": "compatible",
+  "source": "demo",
+  "declared_by_ref": "org_demo",
+  "declared_at": "2026-01-01T00:00:00Z",
+  "status": "active",
+  "subject": {
+    "local_subject_id": "subj_demo_001",
+    "subject_type": "person",
+    "enterprise_scope": "demo",
+    "concentration_tier": "T2"
+  }
+}

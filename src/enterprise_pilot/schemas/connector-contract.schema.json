@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EnterprisePilotConnectorContract",
+  "description": "连接器契约输出 shape；write_enabled 默认 False（红线 #3）。",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {"type": "string"},
+    "write_enabled": {"type": "boolean"},
+    "contract": {
+      "type": "string",
+      "enum": ["report_export", "warning_event", "review_recommendation", "audit_export"]
+    },
+    "goe": {"type": "object"},
+    "warnings": {"type": "array"},
+    "review_record": {"type": "object"},
+    "audit_jsonl": {"type": "string"}
+  },
+  "required": ["name", "write_enabled", "contract"]
+}

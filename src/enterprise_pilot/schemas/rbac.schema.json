@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EnterprisePilotRbac",
+  "description": "RBAC 角色/主体 schema；仅含 Operator/Service Principal，显式排除 ObservedSubject（红线 #1）。",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string", "enum": ["admin", "operator", "auditor", "viewer"]},
+          "permissions": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": ["name", "permissions"]
+      }
+    },
+    "principals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {"type": "string"},
+          "kind": {"type": "string", "enum": ["operator", "service"]},
+          "roles": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": ["principal_id", "kind", "roles"]
+      }
+    }
+  },
+  "required": ["roles", "principals"]
+}

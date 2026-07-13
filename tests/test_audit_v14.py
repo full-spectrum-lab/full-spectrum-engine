@@ -183,5 +183,30 @@ class TestStoreImmutabilityContract(unittest.TestCase):
         self.assertEqual(store.count_by_type("ORIGINAL"), 1)
 
 
+class TestStoreImmutabilityContract(unittest.TestCase):
+    def test_store_exposes_no_historical_update_delete_api(self):  # FR-06 red-line
+        """The store must NOT expose any surface to UPDATE/DELETE a historical
+        ORIGINAL/REPLAY event. Covering history is impossible via the public
+        API (only append + audited operations exist), satisfying the v1.4
+        'cover-historical-audit' red-line at the storage layer."""
+        store = _tmp_store()
+        ev = _record(store)
+        forbidden = ("update", "delete", "modify", "replace",
+                     "remove", "purge_event", "update_event")
+        exposed = [m for m in forbidden if hasattr(store, m)]
+        self.assertEqual(
+            exposed, [],
+            f"store must not expose history-mutating API: {exposed}",
+        )
+        # The only event-writing method is append(); re-appending the identical
+        # event (an overwrite attempt) is rejected -> history is immutable.
+        with self.assertRaises(Exception):
+            store.append(ev)
+        # The original event is still intact (byte-identical) after the refused write.
+        self.assertEqual(
+            store.get(ev["event_id"])["event_hash"], ev["event_hash"]
+        )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

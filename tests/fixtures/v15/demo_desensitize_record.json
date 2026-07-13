@@ -1,0 +1,13 @@
+{
+  "name": "张三",
+  "id_card": "110101199001011234",
+  "email": "zhangsan@example.com",
+  "phone": "13800001111",
+  "national_id": "CN-987654321",
+  "ip": "203.0.113.45",
+  "device_id": "DEV-A1B2C3",
+  "address": "北京市朝阳区某路1号",
+  "order_id": "ORD-1001",
+  "amount": 199.00,
+  "sku": "SKU-XYZ"
+}

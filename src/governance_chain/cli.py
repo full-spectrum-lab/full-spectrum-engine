@@ -420,6 +420,139 @@ def cmd_replay_retention_cleanup(args):
     return 0
 
 
+# ================================================================
+# v1.5 enterprise_pilot subcommand group (ADDITIVE; 不改动既有子命令)
+# ================================================================
+def cmd_pilot_config_check(args):
+    from src.enterprise_pilot import ConfigSecretManager, split_config_secrets
+    cfg = ConfigSecretManager.load_config(args.input)
+    _cfg, refs = split_config_secrets(cfg)
+    print(f"config_id={cfg.get('config_id')}")
+    if refs:
+        print("secret references (credentials NOT inlined into repo):")
+        for ref in refs:
+            print(f"  - {ref}")
+    else:
+        print("no secret references found")
+    return 0
+
+
+def cmd_pilot_config_resolve(args):
+    from src.enterprise_pilot import ConfigSecretManager
+    mgr = ConfigSecretManager(config_path=args.input, secret_backend="secret-file",
+                               secret_file=args.secret_file)
+    try:
+        resolved = mgr.load_resolved()
+    except Exception as exc:  # noqa: BLE001
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(resolved, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_pilot_auth_token(args):
+    from src.enterprise_pilot import generate_token
+    print(generate_token())
+    return 0
+
+
+def cmd_pilot_auth_roles(args):
+    from src.enterprise_pilot import ROLE_PERMISSIONS
+    for role, perms in ROLE_PERMISSIONS.items():
+        print(f"{role}: {sorted(perms)}")
+    return 0
+
+
+def cmd_pilot_desensitize_run(args):
+    from src.enterprise_pilot import apply_desensitization
+    record = _load_json_file(args.input)
+    policy = _load_json_file(args.policy)
+    out, mapping = apply_desensitization(record, policy)
+    print(json.dumps({"desensitized": out, "mapping": mapping.to_dict()},
+                      ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_pilot_review_trigger(args):
+    from src.governance_chain import evaluation_event as ee_mod
+    from src.governance_chain import replay_store as rs_mod
+    from src.enterprise_pilot import record_review
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else rs_mod.get_default_store()
+    env = _load_json_file(args.input)
+    try:
+        out = ee_mod.record_evaluation(env, store=store)
+    except ee_mod.EventIntegrityError as exc:
+        print(f"error: EVENT_INTEGRITY: {exc}", file=sys.stderr)
+        return 2
+    ref = out["replay_ref"]
+    rec = record_review(ref, args.action, args.reviewer, source_store=store)
+    print(json.dumps(rec, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_pilot_review_record(args):
+    from src.governance_chain import replay_store as rs_mod
+    from src.enterprise_pilot import record_review, ReviewBindingError
+    store = rs_mod.EvaluationEventStore(args.store) if args.store else rs_mod.get_default_store()
+    ref = {"event_id": args.event_id, "event_digest": args.event_digest,
+           "bundle_ref": args.bundle_ref}
+    try:
+        rec = record_review(ref, args.action, args.reviewer, comment=args.comment,
+                            source_store=store)
+    except ReviewBindingError as exc:
+        print(f"error: REVIEW_BINDING_FORGED: {exc}", file=sys.stderr)
+        return 2
+    print(json.dumps(rec, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_pilot_review_list(args):
+    from src.enterprise_pilot import ReviewStore
+    from src.enterprise_pilot.review import _default_review_store
+    rs = ReviewStore(args.review_store) if args.review_store else _default_review_store()
+    for rec in rs.list_by_event(args.event_id):
+        print(json.dumps(rec, ensure_ascii=False))
+    return 0
+
+
+def cmd_pilot_health(args):
+    from src.enterprise_pilot import health
+    print(json.dumps(health(), ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_pilot_metrics(args):
+    from src.enterprise_pilot import metrics_snapshot
+    print(json.dumps(metrics_snapshot(), ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_pilot_deploy_walkthrough(args):
+    from src.enterprise_pilot import run_walkthrough
+    result = run_walkthrough(args.repo_root)
+    d = result.to_dict()
+    print(f"independent={d['independent']} complete={d['complete']}")
+    for name, ok in d["checks"]:
+        print(f"  [{'PASS' if ok else 'FAIL'}] {name}")
+    return 0 if (d["independent"] and d["complete"]) else 1
+
+
+def cmd_pilot_connector_list(args):
+    from src.enterprise_pilot import CONTRACT_KINDS
+    for kind in CONTRACT_KINDS:
+        print(kind)
+    return 0
+
+
+def cmd_pilot_connector_emit_off(args):
+    from src.enterprise_pilot import ConnectorContract
+    contract = ConnectorContract(args.name, write_enabled=False)
+    payload = json.loads(args.payload) if args.payload else {}
+    out = contract.emit(args.kind, payload)
+    print(json.dumps(out, ensure_ascii=False, indent=2))
+    return 0
+
+
 def build_parser():
     p = argparse.ArgumentParser(
         prog="fsengine-govchain",
@@ -539,6 +672,82 @@ def build_parser():
     rp_cl.add_argument("--before", required=True, help="ISO-8601 cutoff; remove OPERATION events before this.")
     rp_cl.add_argument("--store", default=None, help="EvaluationEventStore .sqlite path.")
     rp_cl.set_defaults(func=cmd_replay_retention_cleanup)
+
+    # ---- v1.5 enterprise_pilot subcommand group (ADDITIVE) ----
+    pilot = sub.add_parser(
+        "pilot",
+        help="v1.5 企业试点候选（配置/认证/脱敏/复核/健康/指标/部署/连接器）。",
+    )
+    pss = pilot.add_subparsers(dest="pilot_cmd", required=True)
+
+    pc = pss.add_parser("config", help="配置与秘密分离（C-01）。")
+    pcs = pc.add_subparsers(dest="config_cmd", required=True)
+    pcc = pcs.add_parser("check", help="检查配置并列出秘密引用（凭证不进仓库）。")
+    pcc.add_argument("--input", "-i", required=True, help="配置文件路径。")
+    pcc.set_defaults(func=cmd_pilot_config_check)
+    pcr = pcs.add_parser("resolve", help="按引用解析秘密后输出（仅本地）。")
+    pcr.add_argument("--input", "-i", required=True, help="配置文件路径。")
+    pcr.add_argument("--secret-file", default=None, help="secret-file 路径（可选）。")
+    pcr.set_defaults(func=cmd_pilot_config_resolve)
+
+    pa = pss.add_parser("auth", help="最小认证 + RBAC（C-02）。")
+    pas = pa.add_subparsers(dest="auth_cmd", required=True)
+    pas.add_parser("token", help="生成预共享操作员令牌（reference token）。").set_defaults(
+        func=cmd_pilot_auth_token
+    )
+    pas.add_parser("roles", help="打印角色权限矩阵。").set_defaults(func=cmd_pilot_auth_roles)
+
+    pd_ = pss.add_parser("desensitize", help="脱敏（C-03）。")
+    pds = pd_.add_subparsers(dest="desensitize_cmd", required=True)
+    pdr = pds.add_parser("run", help="对记录应用脱敏策略。")
+    pdr.add_argument("--input", "-i", required=True, help="待脱敏记录 JSON。")
+    pdr.add_argument("--policy", "-p", required=True, help="脱敏策略 JSON。")
+    pdr.set_defaults(func=cmd_pilot_desensitize_run)
+
+    pr = pss.add_parser("review", help="人工复核（C-04，绑定真实 EvaluationEvent）。")
+    prs = pr.add_subparsers(dest="review_cmd", required=True)
+    prt = prs.add_parser("trigger", help="记录事件并触发一次复核（演示完整链路）。")
+    prt.add_argument("--input", "-i", required=True, help="Input Envelope JSON。")
+    prt.add_argument("--reviewer", required=True, help="复核人主体 id。")
+    prt.add_argument("--action", default="approve",
+                     choices=["approve", "reject", "comment"])
+    prt.add_argument("--store", default=None, help="EvaluationEventStore .sqlite 路径。")
+    prt.set_defaults(func=cmd_pilot_review_trigger)
+    prrc = prs.add_parser("record", help="对已有事件记录复核（需 event-id / event-digest）。")
+    prrc.add_argument("--event-id", required=True)
+    prrc.add_argument("--event-digest", required=True)
+    prrc.add_argument("--bundle-ref", default=None)
+    prrc.add_argument("--action", default="approve",
+                      choices=["approve", "reject", "comment"])
+    prrc.add_argument("--reviewer", required=True)
+    prrc.add_argument("--comment", default=None)
+    prrc.add_argument("--store", default=None, help="EvaluationEventStore .sqlite 路径。")
+    prrc.set_defaults(func=cmd_pilot_review_record)
+    prl = prs.add_parser("list", help="按事件列出复核记录。")
+    prl.add_argument("--event-id", required=True)
+    prl.add_argument("--review-store", default=None, help="ReviewStore .sqlite 路径。")
+    prl.set_defaults(func=cmd_pilot_review_list)
+
+    pss.add_parser("health", help="健康检查（C-06）。").set_defaults(func=cmd_pilot_health)
+    pss.add_parser("metrics", help="指标快照（C-06）。").set_defaults(func=cmd_pilot_metrics)
+
+    pdw = pss.add_parser("deploy", help="部署走查（C-09）。")
+    pdws = pdw.add_subparsers(dest="deploy_cmd", required=True)
+    pdww = pdws.add_parser("walkthrough", help="非作者部署走查（独立性/完整性）。")
+    pdww.add_argument("--repo-root", default=None)
+    pdww.set_defaults(func=cmd_pilot_deploy_walkthrough)
+
+    pcon = pss.add_parser("connector", help="企业 Connector 契约（C-08）。")
+    pcons = pcon.add_subparsers(dest="connector_cmd", required=True)
+    pcons.add_parser("list", help="列出四契约种类。").set_defaults(func=cmd_pilot_connector_list)
+    pcone = pcons.add_parser("emit-off", help="写回默认 OFF 方式 emit 契约载荷（绝不写回）。")
+    pcone.add_argument("--name", required=True)
+    pcone.add_argument("--kind", required=True,
+                       choices=["report_export", "warning_event",
+                                "review_recommendation", "audit_export"])
+    pcone.add_argument("--payload", "-p", default="{}", help="契约载荷 JSON。")
+    pcone.set_defaults(func=cmd_pilot_connector_emit_off)
+
     return p
 
 

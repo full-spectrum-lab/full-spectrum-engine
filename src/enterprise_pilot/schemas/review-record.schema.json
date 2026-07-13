@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EnterprisePilotReviewRecord",
+  "description": "人工复核记录；original_event_ref 必须真实可解析（红线 #8）。",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_id": {"const": "rvw-1.5"},
+    "review_id": {"type": "string"},
+    "original_event_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {"type": "string"},
+        "event_digest": {"type": "string"},
+        "bundle_ref": {"type": ["string", "null"]}
+      },
+      "required": ["event_id", "event_digest"]
+    },
+    "action": {"type": "string", "enum": ["approve", "reject", "comment"]},
+    "reviewer_principal_id": {"type": "string"},
+    "comment": {"type": ["string", "null"]},
+    "recorded_at": {"type": "string"},
+    "review_hash": {"type": "string"}
+  },
+  "required": [
+    "schema_id", "review_id", "original_event_ref", "action",
+    "reviewer_principal_id", "recorded_at", "review_hash"
+  ]
+}
