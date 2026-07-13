@@ -30,6 +30,7 @@ from .auth_rbac import (
     SubjectAsPrincipalError,
     AuthorizationError,
     AuthenticationError,
+    ROLE_PERMISSIONS,
 )
 from .desensitize import (
     Desensitizer,
@@ -72,6 +73,7 @@ from .lifecycle import (
 from .connector_contract import (
     ConnectorContract,
     ContractKind,
+    CONTRACT_KINDS,
     emit_contract,
 )
 from .deploy_walkthrough import (
@@ -92,6 +94,7 @@ __all__ = [
     "RbacEngine", "TokenRegistry", "OperatorPrincipal", "ServicePrincipal", "Role",
     "authenticate", "authorize", "generate_token",
     "SubjectAsPrincipalError", "AuthorizationError", "AuthenticationError",
+    "ROLE_PERMISSIONS",
     "Desensitizer", "MappingRecord", "apply_desensitization", "classify",
     "mask", "hash_value", "tokenize",
     "ReviewRecord", "ReviewStore", "ReviewBindingError", "record_review", "verify_review_bindings",
@@ -100,6 +103,7 @@ __all__ = [
     "StructuredLogger", "HealthCheck", "Metrics", "health", "metrics_snapshot",
     "BackupManager", "Rollback", "backup", "restore",
     "ConnectorContract", "ContractKind", "emit_contract",
+    "CONTRACT_KINDS",
     "DeployWalkthrough", "WalkthroughResult", "run_walkthrough",
     "load_pilot_schema", "validate_pilot",
     "__version__",

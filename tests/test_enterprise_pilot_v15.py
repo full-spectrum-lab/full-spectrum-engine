@@ -14,6 +14,7 @@ import re
 import sys
 import tempfile
 import unittest
+import subprocess
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
@@ -488,6 +489,31 @@ class TestDeployWalkthrough(unittest.TestCase):
         self.assertTrue(result.complete, msg=f"checks={result.checks}")
         # 独立性：受保护核心目录零侵入
         self.assertTrue(result.independent, msg=f"checks={result.checks}")
+
+
+class TestPilotPublicCli(unittest.TestCase):
+    """Public pilot commands must be reachable through the package facade."""
+
+    def _run(self, *args):
+        return subprocess.run(
+            [sys.executable, "-m", "src.governance_chain", "pilot", *args],
+            cwd=REPO_ROOT,
+            text=True,
+            encoding="utf-8",
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+
+    def test_auth_roles_command(self):
+        result = self._run("auth", "roles")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("admin", result.stdout)
+
+    def test_connector_list_command(self):
+        result = self._run("connector", "list")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("report_export", result.stdout)
 
 
 # ----------------------------------------------------------------------------
