@@ -15,6 +15,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # v1.5 zero-intrusion checks compare protected modules with the
+          # portable v1.2.0 release tag, so CI needs tag history available.
+          fetch-depth: 0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
