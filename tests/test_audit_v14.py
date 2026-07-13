@@ -159,6 +159,17 @@ class TestRetentionBackupRestore(unittest.TestCase):
         # After restore the extra ORIGINAL is gone (backup had only 1).
         self.assertEqual(store.count_by_type("ORIGINAL"), 1)
 
+
+class TestStoreImmutabilityContract(unittest.TestCase):
+    def test_store_exposes_no_historical_update_delete_api(self):
+        store = _tmp_store()
+        event = _record(store)
+        forbidden = ("update", "delete", "modify", "replace", "remove", "purge_event", "update_event")
+        self.assertEqual([name for name in forbidden if hasattr(store, name)], [])
+        with self.assertRaises(Exception):
+            store.append(event)
+        self.assertEqual(store.get(event["event_id"])["event_hash"], event["event_hash"])
+
     def test_cleanup_prunes_only_trailing_operations(self):  # FR-06 red-line
         store = _tmp_store()
         ev = _record(store)  # ORIGINAL event (immortal)
