@@ -52,11 +52,11 @@ from src.subject import normalize_declaration, subject_ref, SubjectDeclarationEr
 from src.governance_chain.profiles.registry import get_default_registry as get_profile_registry  # noqa: E402
 from src.governance_chain.registry import ProfileIntegrityError  # noqa: E402
 
-router = APIRouter(prefix="/api/v1", tags=["v1.2.0"])
+router = APIRouter(prefix="/api/v1", tags=["v1.3.0"])
 
 # API version identifiers
-API_VERSION = "1.2.0"
-ENGINE_VERSION = "1.2.0"
+API_VERSION = "1.3.0"
+ENGINE_VERSION = "1.3.0"
 
 # Required risk vector fields (must match RiskVector.to_dict())
 # Note: the field name "reversibility" is retained for protocol compatibility,
