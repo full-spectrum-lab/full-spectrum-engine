@@ -18,7 +18,7 @@ BB 映射（与架构设计.md §5.2 一致）：
             （eligibility_candidate ∈ {CANDIDATE, NOT_CANDIDATE, UNKNOWN}）
     BB-07  UNKNOWN / 硬禁止不被 risk_vector 均值/最大值覆盖
             （置 human_review_recommendation.required=true 并显式标注）
-    BB-08  零侵入：git diff 86b9f0a -- 核心模块 为空
+    BB-08  零侵入：git diff v1.2.0 -- 核心模块 为空
     BB-09  反模式扫描：external_effect 恒 false / replay_ref 恒 null /
             gate 保持对象形式 / EXTERNAL_ACTIVE 不启用 / L4_CANDIDATE 不生效
 
@@ -34,7 +34,7 @@ import sys
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-BASE_COMMIT = "86b9f0a"
+BASE_COMMIT = "v1.2.0"
 CORE_MODULES = [
     "src/core", "src/engine", "src/storage", "src/bridge",
     "src/guardian", "src/governance", "src/observation", "src/safety",
@@ -216,7 +216,7 @@ def bb07_unknown_not_covered():
 
 
 def bb08_zero_intrusion():
-    """BB-08: 零侵入 — 核心模块相对 86b9f0a 的 diff 为空。"""
+    """BB-08: 零侵入 — 核心模块相对正式 v1.2.0 标签的 diff 为空。"""
     proc = subprocess.run(
         ["git", "-C", REPO_ROOT, "diff", BASE_COMMIT, "--"] + CORE_MODULES,
         cwd=REPO_ROOT, capture_output=True, text=True,

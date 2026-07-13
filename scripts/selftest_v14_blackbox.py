@@ -17,7 +17,7 @@ BB 映射（与架构设计.md §5.2 / §6 一致）：
     BB-05  ReplayEngine.replay 追加 REPLAY 事件、原事件不变（AC-01 digest 稳定）
     BB-06  NFR-02 缺失 Profile 版本 → 显式 ReplayDependencyError（绝不猜测）
     BB-07  Audit 导出 canonical JSONL + verify_chain 干净链 (True, [])
-    BB-08  零侵入：git diff 86b9f0a -- 核心模块 为空
+    BB-08  零侵入：git diff v1.2.0 -- 核心模块 为空
     BB-09  反模式扫描：v1.3 路径 replay_ref 恒 null / v1.4 路径 replay_ref 真实；
             external_effect 恒 false / gate 对象形式 / EXTERNAL_ACTIVE 不启用 /
             L4_CANDIDATE 不生效
@@ -35,7 +35,7 @@ import tempfile
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-BASE_COMMIT = "86b9f0a"
+BASE_COMMIT = "v1.2.0"
 CORE_MODULES = [
     "src/core", "src/engine", "src/storage", "src/bridge",
     "src/guardian", "src/governance", "src/observation", "src/safety",
@@ -234,7 +234,7 @@ def bb07_audit_export_verify():
 
 
 def bb08_zero_intrusion():
-    """BB-08: 零侵入 — 核心模块相对 86b9f0a 的 diff 为空。"""
+    """BB-08: 零侵入 — 核心模块相对正式 v1.2.0 标签的 diff 为空。"""
     proc = subprocess.run(
         ["git", "-C", REPO_ROOT, "diff", BASE_COMMIT, "--"] + CORE_MODULES,
         cwd=REPO_ROOT, capture_output=True, text=True,
