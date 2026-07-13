@@ -6,11 +6,10 @@
 
 [![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2%20%2F%20Apache%202.0-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-green)](https://www.python.org/)
-[![Status](https://img.shields.io/badge/Status-v1.0.0-stable_local--first-success)](#)
-[![Tests](https://img.shields.io/badge/Tests-141%20passed-brightgreen)](#)
-[![CI](https://github.com/full-spectrum-lab/full-spectrum-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/full-spectrum-lab/full-spectrum-engine/actions/workflows/ci.yml)
+[![Status](https://img.shields.io/badge/Status-v1.5.0-enterprise_pilot_candidate-success)](#)
+[![Tests](https://img.shields.io/badge/Tests-285%20passed%20%2B%203%20subtests-brightgreen)](#)
 
-Full Spectrum Engine is the runnable first-generation **Observer Engine** in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, local audit records, and optional ESS-lite path suggestions.
+Full Spectrum Engine is the runnable engine layer in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, local audit records, and optional ESS-lite path suggestions.
 
 This repository is for **local internal validation first**:
 
@@ -24,7 +23,21 @@ It does **not** upload enterprise data by default, does **not** execute final bu
 
 ## 中文一句话
 
-这是全频谱体系里的第一代本地观察者引擎 v1.0：企业使用自己的数据和可选的本地主体声明，完成分析、风险预警、报告与审计留痕。它不要求加入社区、公共 DID、认证网络或协议网络，也不执行最终业务动作。
+这是全频谱体系里的企业内部治理引擎：v1.5 在本地可复现计算、Profile、回放与审计基础上，增加受控企业试点所需的配置/秘密分离、最小 RBAC、脱敏、人工复核、韧性、可观测性、备份回滚和默认关闭写回的 Connector 契约。
+
+## v1.5 enterprise pilot candidate
+
+`v1.5.0` is an additive enterprise-pilot release over the sealed v1.4 replay/audit baseline:
+
+- configuration contains secret references, not embedded credentials;
+- authentication is limited to local operator/service reference tokens and never treats an ObservedSubject as a login identity;
+- field minimization, masking, hashing and tokenization support controlled trials;
+- human review records bind to real v1.4 evaluation events and remain append-only;
+- retry, observable timeout, health, metrics, backup and rollback primitives are included;
+- four Connector output contracts are available with writeback disabled by default;
+- protected engine directories remain byte-identical to the frozen v1.2 baseline.
+
+Release evidence: 285 pytest cases plus 3 subtests, v1.5 black box 13/13, v1.4 regression black box 9/9, red-line verification 9/9, and zero-byte protected-core diff. This is a controlled pilot candidate, not a claim of autonomous business execution or production-complete enterprise governance.
 
 ---
 
@@ -80,21 +93,14 @@ If you want the fastest possible overview before reading code, start here:
 | --- | --- |
 | [`full-spectrum-protocol`](https://github.com/full-spectrum-lab/full-spectrum-protocol) | Public protocol specification, RFCs, schemas, mappings, and examples |
 | [`full-spectrum-engine`](https://github.com/full-spectrum-lab/full-spectrum-engine) | Runnable local-first engine (this repository) |
-| [`full-spectrum-enterprise-governance`](https://github.com/full-spectrum-lab/full-spectrum-enterprise-governance) | Enterprise cases, Profiles, adapters, human-review workflows, and deployment guidance |
+| [`full-spectrum-enterprise-governance`](https://github.com/full-spectrum-lab/full-spectrum-enterprise-governance) | Enterprise deployment package, industry adapters, dashboards, and internal governance workflows |
 | [`full-spectrum-commons`](https://github.com/full-spectrum-lab/full-spectrum-commons) | Shared diagrams, ecosystem descriptions, and public-facing common materials |
 
-A practical observer-first adoption path is:
+A practical adoption path is:
 
 1. run the **engine layer** locally inside one organization
-2. add an optional enterprise-local subject declaration when attribution matters
-3. stabilize I/O, Profile, replay, and audit contracts
-4. add certified identity or protocol-network interoperability only when cross-organization use requires it
-
-## Evidence and research
-
-- [Evidence and Project Status](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/docs/evidence-and-status.md)
-- [WP-001: Governance Semantics and a Local-First Observer Engine](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/research/working-papers/wp-001-governance-semantics-and-local-observer-engine.md) — working paper, not peer reviewed
-- [Legacy Manuscript Editorial Review](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/research/working-papers/legacy-manuscript-review.md)
+2. add **cell protocol declarations** when identity, permission, and responsibility need to be formalized
+3. add the **protocol network layer** only when multiple subjects need cross-node audit or coordination
 
 ---
 

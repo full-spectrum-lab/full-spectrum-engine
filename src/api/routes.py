@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Full Spectrum Engine API — Route definitions (v1.4.0)
+Full Spectrum Engine API — Route definitions (v1.5.0)
 
-14 endpoints (first 8 are pre-v1.4; last 6 are v1.4 additive, read-only/append-only,
-never modify prior behavior):
+24 endpoints: 18 through v1.4 plus 6 additive v1.5 enterprise-pilot endpoints.
     GET    /api/v1/health                    — Health check (enhanced: storage metadata)
     POST   /api/v1/evaluate                  — Simulation evaluation (direct mode + adapter mode)
     POST   /api/v1/runestone                 — Standalone runestone generation
@@ -22,6 +21,12 @@ never modify prior behavior):
     GET    /api/v1/evaluation/events         — v1.4 list events (FR-09)
     POST   /api/v1/audit/export               — v1.4 export chain as canonical JSONL (FR-09)
     POST   /api/v1/audit/verify               — v1.4 verify chain integrity / tamper (FR-09)
+    POST   /api/v1/pilot/auth/verify           — v1.5 reference-token verification
+    POST   /api/v1/pilot/review                — v1.5 append-only human review
+    GET    /api/v1/pilot/health                — v1.5 pilot health
+    GET    /api/v1/pilot/metrics               — v1.5 pilot counters
+    POST   /api/v1/pilot/connector/export      — v1.5 connector contract export
+    POST   /api/v1/pilot/deploy/walkthrough    — v1.5 local deployment walkthrough
 
 Engineering constraints:
     - API body strictly compatible with CLI output (no envelope) (P1-1)
@@ -78,11 +83,11 @@ from src.subject import normalize_declaration, subject_ref, SubjectDeclarationEr
 from src.governance_chain.profiles.registry import get_default_registry as get_profile_registry  # noqa: E402
 from src.governance_chain.registry import ProfileIntegrityError  # noqa: E402
 
-router = APIRouter(prefix="/api/v1", tags=["v1.4.0"])
+router = APIRouter(prefix="/api/v1", tags=["v1.5.0"])
 
 # API version identifiers
-API_VERSION = "1.4.0"
-ENGINE_VERSION = "1.4.0"
+API_VERSION = "1.5.0"
+ENGINE_VERSION = "1.5.0"
 
 # Required risk vector fields (must match RiskVector.to_dict())
 # Note: the field name "reversibility" is retained for protocol compatibility,
