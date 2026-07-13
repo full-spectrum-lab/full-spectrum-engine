@@ -8,7 +8,7 @@ C-05 幂等 / 重试 / 超时 / 失败可恢复（FR-05 / C-05）。
 标准库实现（concurrent.futures 跨平台超时），无新第三方依赖。
 """
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
 from src.governance_chain.envelope import canonical_json
 
@@ -66,7 +66,7 @@ class Timeout:
         future = executor.submit(fn, *args, **kwargs)
         try:
             return future.result(timeout=self.seconds)
-        except TimeoutError:
+        except FuturesTimeoutError:
             # Executor context-manager exit waits for running work.  That made
             # a nominal timeout block until the slow operation completed.
             future.cancel()
