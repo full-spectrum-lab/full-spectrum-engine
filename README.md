@@ -1,5 +1,7 @@
 # Full Spectrum Engine
 
+[English](README.md) · [简体中文](README.zh-CN.md)
+
 [![public intro](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/diagrams/public-intro/from-ethical-appeal-to-engineering-compilation.png?raw=1)](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/diagrams/public-intro/from-ethical-appeal-to-engineering-compilation.png)
 
 > Local-first governance runtime for reproducible AI inspection, risk visibility, audit trace, and explainable simulation.
@@ -10,6 +12,16 @@
 [![Tests](https://img.shields.io/badge/Tests-285%20passed%20%2B%203%20subtests-brightgreen)](#)
 
 Full Spectrum Engine is the runnable engine layer in the Full Spectrum ecosystem. It turns AI behavior, knowledge-source conflicts, structured metrics, and synthetic scenarios into reproducible outputs such as `RiskVector`, `Runestone`, local audit records, and optional ESS-lite path suggestions.
+
+## Release truth
+
+| Line | GitHub status | Meaning |
+| --- | --- | --- |
+| [`v1.4.0`](https://github.com/full-spectrum-lab/full-spectrum-engine/releases/tag/v1.4.0) | **Latest stable release** | Replay and audit hardening baseline. |
+| [`v1.5.0`](https://github.com/full-spectrum-lab/full-spectrum-engine/releases/tag/v1.5.0) | **Pre-release** | Enterprise-pilot candidate; additive controls over v1.4. |
+| [`v1.0.0`](https://github.com/full-spectrum-lab/full-spectrum-engine/releases/tag/v1.0.0) | Stable historical baseline | First stable local-first contract release. |
+
+`v1.5.0` already exists on both public release tracks. Its pre-release label is intentional and must not be interpreted as a production-complete enterprise platform.
 
 This repository is for **local internal validation first**:
 
