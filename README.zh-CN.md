@@ -1,5 +1,9 @@
 # Full Spectrum Engine
 
+[![全频谱三层入口与三大核心组件](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/diagrams/architecture/three-entry-three-core-components-zh-v10.png?raw=1)](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/docs/three-entry-three-core-components.md)
+
+**Engine 在体系中的位置：** Protocol 定义主体与治理契约，Engine 生成确定性分析和证据，Observer 将结果连接到本地观察、回放与人工复核。Engine 不替企业执行最终业务或生产动作。
+
 [English](README.md) · [简体中文](README.zh-CN.md)
 
 > 用于可复现 AI 检查、风险可见性、审计追踪和可解释仿真的本地优先治理运行时。
@@ -74,4 +78,3 @@ python -m src.governance_chain validate out/governance_chain
 ## 许可证
 
 本项目采用木兰宽松许可证第 2 版与 Apache License 2.0 双许可证，使用者可选择其中任一许可证。详见 [LICENSE](LICENSE)。
-
