@@ -68,6 +68,10 @@ Release evidence: 285 pytest cases plus 3 subtests, v1.5 black box 13/13, v1.4 r
 
 If you want the fastest possible overview before reading code, start here:
 
+[![Protocol, Engine and Observer boundary](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/diagrams/product-views/protocol-engine-observer-boundary-en-v01.png?raw=1)](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/docs/visual-index.md)
+
+The diagram explains ecosystem relationships; it does not make Engine depend on Observer. Engine remains independently runnable, and its release table above is the delivery truth.
+
 - [From Ethical Appeal to Engineering Compilation](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/diagrams/public-intro/from-ethical-appeal-to-engineering-compilation.png)
 - [Three Entry Paths and Three Core Components](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/docs/three-entry-three-core-components.md)
 - [Why AI Needs a Relationship Protocol](https://github.com/full-spectrum-lab/full-spectrum-commons/blob/main/diagrams/protocol-system/why-ai-needs-relationship-protocol.png)
