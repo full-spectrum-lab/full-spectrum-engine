@@ -8,6 +8,8 @@
 
 > 用于可复现 AI 检查、风险可见性、审计追踪和可解释仿真的本地优先治理运行时。
 
+**产品边界：**Engine 可独立使用，执行确定性、可复算的治理判断；它不是 Agent Runtime、任务规划器、工作流调度器、工具执行器或 LLM 编排器。最终业务行动不由 Engine 执行。
+
 [![CI](https://github.com/full-spectrum-lab/full-spectrum-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/full-spectrum-lab/full-spectrum-engine/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2%20%2F%20Apache%202.0-blue)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-v1.5.0--enterprise__pilot__candidate-success)](https://github.com/full-spectrum-lab/full-spectrum-engine/releases/tag/v1.5.0)

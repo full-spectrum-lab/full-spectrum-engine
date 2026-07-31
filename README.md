@@ -6,6 +6,8 @@
 
 > Local-first governance runtime for reproducible AI inspection, risk visibility, audit trace, and explainable simulation.
 
+**Identity boundary:** Engine performs deterministic, reproducible governance evaluation. It is independently usable and is **not** an agent runtime, planner, workflow scheduler, tool executor or LLM orchestrator. Final business action remains outside Engine.
+
 [![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2%20%2F%20Apache%202.0-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10+-green)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/Status-v1.5.0-enterprise_pilot_candidate-success)](#)
